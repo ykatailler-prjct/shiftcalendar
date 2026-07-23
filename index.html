@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учет смен и отпусков (Облако)</title>
+    
+    <!-- Подключение Firebase (версия Compat для работы с обычным JS) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        :root {
+            --bg: #f5f5f0; --card: #ffffff; --text: #2d2d2d; --text-light: #6b6b6b;
+            --accent: #4a6741; --accent-light: #e8f0e5; --overtime: #c47a3a;
+            --weekend: #e8e8e0; --vacation: #d4e4f0; --shift-1: #2980b9; --shift-2: #8e44ad;
+            --border: #d0d0c8; --shadow: 0 2px 8px rgba(0,0,0,0.06); --salary: #27ae60;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 24px; max-width: 1200px; margin: 0 auto; line-height: 1.5; }
+        h1 { font-weight: 300; font-size: 1.8rem; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+
+        /* Табы */
+        .tabs { display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
+        .tab-btn { padding: 10px 24px; background: transparent; border: 2px solid transparent; border-radius: 8px; cursor: pointer; font-size: 1rem; color: var(--text-light); transition: 0.2s; }
+        .tab-btn:hover { color: var(--text); background: var(--card); }
+        .tab-btn.active { background: var(--card); color: var(--accent); border-color: var(--border); box-shadow: var(--shadow); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Дашборд */
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; transition: 0.2s; }
+        .stat-card.clickable { cursor: pointer; }
+        .stat-card.clickable:hover { transform: translateY(-2px); border-color: var(--accent); }
+        .stat-card.highlight { border-color: var(--salary); background: #f9fdfa; }
+        .stat-card.highlight .value { color: var(--salary); }
+        .stat-card .label { font-size: 0.8rem; color: var(--text-light); text-transform: uppercase; display: flex; justify-content: space-between; }
+        .stat-card .value { font-size: 1.6rem; font-weight: 600; margin-top: 4px; }
+        .stat-card .sub { font-size: 0.85rem; color: var(--text-light); margin-top: 4px; }
+
+        /* Кнопки */
+        .controls { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; background: var(--card); border: 1px solid var(--border); transition: 0.2s; }
+        .btn:hover { background: var(--accent-light); border-color: var(--accent); }
+        .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+        .btn-primary:hover { background: #3d5636; }
+        .btn-danger { background: white; color: #c0392b; border-color: #c0392b; }
+
+        /* Календарь */
+        .month-nav { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .month-nav h2 { font-weight: 400; font-size: 1.4rem; min-width: 220px; text-align: center; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 24px; }
+        .day-header { text-align: center; font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; padding: 8px 0; }
+        .day-cell { background: var(--card); border-radius: 10px; min-height: 90px; padding: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.15s; display: flex; flex-direction: column; }
+        .day-cell:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+        .day-cell.empty { background: transparent; pointer-events: none; }
+        .day-cell.weekend { background: var(--weekend); }
+        .day-cell.vacation { background: var(--vacation); border-color: #8ab4d0; }
+        .day-cell.has-shift-1 { border-color: var(--shift-1); }
+        .day-cell.has-shift-2 { border-color: var(--shift-2); }
+        .day-cell.has-overtime { border-bottom-color: var(--overtime); border-bottom-width: 4px; }
+        .day-cell.today .day-number { background: var(--accent); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .day-number { font-size: 0.85rem; font-weight: 500; color: var(--text-light); }
+        .day-content { font-size: 0.75rem; margin-top: 4px; display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; color: white; }
+        .day-hours { font-size: 0.7rem; color: var(--text-light); margin-top: auto; padding-top: 4px; border-top: 1px dashed var(--border); }
+
+        /* Модальные окна */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--card); border-radius: 16px; padding: 28px; width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
+        .modal h3 { font-weight: 400; font-size: 1.2rem; margin-bottom: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85rem; color: var(--text-light); margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; }
+        .radio-options { display: flex; flex-direction: column; gap: 8px; }
+        .radio-option { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+        .modal-actions .btn { flex: 1; }
+
+        /* Специфично для окна логина */
+        #loginOverlay { background: var(--bg); backdrop-filter: none; z-index: 999; }
+        #loginOverlay .modal { text-align: center; }
+        #loginOverlay input { margin-bottom: 10px; }
+        .error-msg { color: #c0392b; font-size: 0.8rem; margin-bottom: 10px; display: none; }
+
+        /* Настройки и Легенда */
+        .settings-section { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .legend { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; font-size: 0.8rem; color: var(--text-light); }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+        /* Отпуска */
+        .vacation-month-group { margin-bottom: 16px; }
+        .vacation-month-title { font-size: 0.95rem; color: var(--accent); margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; font-weight: 600; }
+        .vacation-days-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .vacation-day-badge { background: var(--vacation); border: 1px solid #8ab4d0; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; }
+        
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: white; padding: 12px 20px; border-radius: 10px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 200; }
+        .toast.show { opacity: 1; transform: translateY(-10px); }
+
+        @media (max-width: 768px) {
+            .calendar-grid { gap: 3px; } .day-cell { min-height: 70px; padding: 4px; } .day-number { font-size: 0.75rem; } body { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН ВХОДА FIREBASE -->
+    <div class="modal-overlay active" id="loginOverlay">
+        <div class="modal">
+            <h3>🔐 Вход в систему</h3>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Введите email и пароль, которые вы создали в Firebase.</p>
+            <div class="error-msg" id="loginError"></div>
+            <input type="email" id="loginEmail" placeholder="Email" autocomplete="username">
+            <input type="password" id="loginPassword" placeholder="Пароль" autocomplete="current-password">
+            <button class="btn btn-primary" onclick="loginUser()" style="width: 100%; margin-top: 10px;">Войти</button>
+        </div>
+    </div>
+
+    <h1>📅 Учет смен и отпусков</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('calendar')">📅 Календарь</button>
+        <button class="tab-btn" onclick="switchTab('settings')">⚙️ Настройки</button>
+    </div>
+
+    <!-- Вкладка КАЛЕНДАРЬ -->
+    <div id="tab-calendar" class="tab-content active">
+        <!-- ... Твой исходный дашборд и кнопки ... -->
+        <div class="dashboard">
+            <div class="stat-card highlight">
+                <div class="label">Примерная ЗП</div>
+                <div class="value" id="statSalary">0 zł</div>
+                <div class="sub" id="salaryFormulaSub">налог. коэф. x0.7025</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Рабочие часы</div>
+                <div class="value" id="statWorkHours">0</div>
+                <div class="sub">обычные смены</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Переработки</div>
+                <div class="value" id="statOvertime">0</div>
+                <div class="sub">в часах</div>
+            </div>
+            <div class="stat-card clickable" onclick="openVacationListModal()">
+                <div class="label"><span>Отпуск (Остаток/Всего)</span> <span>🔍</span></div>
+                <div class="value" id="statVacationGlobal">0 / 0</div>
+                <div class="sub" id="statVacationMonth">В этом месяце: 0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="openVacationModal()">+ Отпуск</button>
+            <button class="btn btn-primary" onclick="openBulkModal()" style="background: var(--shift-1); border-color: var(--shift-1);">+ Заполнить график</button>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--shift-1)"></div> 1 shift</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--shift-2)"></div> 2 shift</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--overtime)"></div> Переработка</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--vacation)"></div> Отпуск</div>
+        </div>
+
+        <div class="month-nav">
+            <button class="btn" onclick="changeMonth(-1)">← Пред.</button>
+            <h2 id="monthTitle"></h2>
+            <button class="btn" onclick="changeMonth(1)">След. →</button>
+        </div>
+        
+        <div class="calendar-grid" id="calendar"></div>
+    </div>
+
+    <!-- Вкладка НАСТРОЙКИ -->
+    <div id="tab-settings" class="tab-content">
+        <div class="settings-section">
+            <h3 id="settingsMonthTitle">💰 Финансы</h3>
+            <div class="form-group"><label>Почасовая ставка:</label><input type="number" id="hourlyRate" step="0.1"></div>
+            <div class="form-group"><label>Сумма за 1 день отпуска:</label><input type="number" id="vacationPay" step="1"></div>
+            <div class="form-group"><label>Премия (Брутто):</label><input type="number" id="bonusPay" step="1"></div>
+            <div class="form-group"><label>Налог. коэф. (Netto):</label><input type="number" id="taxMultiplier" step="0.0001"></div>
+            <button class="btn btn-primary" onclick="saveFinances()">Сохранить на этот месяц</button>
+        </div>
+        <div class="settings-section">
+            <h3>⚙️ Дней отпуска в год</h3>
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="totalVacationDays" style="width: 100px;">
+                <button class="btn btn-primary" onclick="saveVacationTotal()">Сохранить</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h3>👤 Аккаунт</h3>
+            <div class="controls">
+                <button class="btn btn-danger" onclick="logoutUser()">🚪 Выйти из аккаунта</button>
+            </div>
+        </div>
+        <!-- Старый бэкап можно скрыть или оставить, данные теперь в облаке -->
+    </div>
+
+    <!-- МОДАЛКИ (остаются без изменений) -->
+    <div class="modal-overlay" id="shiftModal">
+        <div class="modal">
+            <h3>📝 День <span id="modalDate" style="color:var(--text-light); font-size:0.9rem;"></span></h3>
+            <div class="form-group">
+                <div class="radio-options">
+                    <label class="radio-option"><input type="radio" name="dayType" value="weekend"> Выходной (надчасы x2)</label>
+                    <label class="radio-option"><input type="radio" name="dayType" value="1"> 1 shift</label>
+                    <label class="radio-option"><input type="radio" name="dayType" value="2"> 2 shift</label>
+                </div>
+            </div>
+            <div class="form-group"><label>Надчасы День (x1.5):</label><input type="number" id="otDay" step="0.5"></div>
+            <div class="form-group"><label>Надчасы Ночь (x2):</label><input type="number" id="otNight" step="0.5"></div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="clearDay()">Очистить</button>
+                <button class="btn btn-primary" onclick="saveShift()">Сохранить</button>
+            </div>
+            <button class="btn" style="margin-top:10px; width:100%;" onclick="closeModal('shiftModal')">Закрыть</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="vacationModal">
+        <div class="modal">
+            <h3>🏖️ Добавить отпуск</h3>
+            <div class="form-group"><label>С:</label><input type="date" id="vacationStart"></div>
+            <div class="form-group"><label>По:</label><input type="date" id="vacationEnd"></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('vacationModal')">Отмена</button>
+                <button class="btn btn-primary" onclick="saveVacation()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bulkModal">
+        <div class="modal">
+            <h3>🗓️ Заполнить период</h3>
+            <div class="form-group"><label>С:</label><input type="date" id="bulkStart"></div>
+            <div class="form-group"><label>По:</label><input type="date" id="bulkEnd"></div>
+            <div class="form-group">
+                <div class="radio-options">
+                    <label class="radio-option"><input type="radio" name="bulkType" value="1" checked> 1 shift</label>
+                    <label class="radio-option"><input type="radio" name="bulkType" value="2"> 2 shift</label>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('bulkModal')">Отмена</button>
+                <button class="btn btn-primary" onclick="saveBulk()">Заполнить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="vacationListModal">
+        <div class="modal">
+            <h3>🏖️ История отпусков</h3>
+            <div id="vacationListSummary" style="background: var(--vacation); padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem;"></div>
+            <div id="vacationListContainer" style="overflow-y: auto; flex: 1; padding-right: 4px; margin-bottom: 16px; min-height: 150px;"></div>
+            <button class="btn" style="width: 100%;" onclick="closeModal('vacationListModal')">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div class="toast" id="toast"></div>
+
+<script>
+// ==================== НАСТРОЙКА FIREBASE ====================
+// ⚠️ ВАЖНО: ВСТАВЬ СЮДА СВОИ КЛЮЧИ ИЗ КОНСОЛИ FIREBASE ⚠️
+const firebaseConfig = {
+  apiKey: "AIzaSyAXAk_c5I9ZwHV36_OIHe7L8bvz0k3ghAU",
+  authDomain: "shiftcalendar-23db7.firebaseapp.com",
+  projectId: "shiftcalendar-23db7",
+  storageBucket: "shiftcalendar-23db7.firebasestorage.app",
+  messagingSenderId: "737419297805",
+  appId: "1:737419297805:web:14c5b646d5dfa5d590c144"
+};
+
+// Инициализация
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+let currentUser = null;
+
+// ==================== ИНИЦИАЛИЗАЦИЯ ДАННЫХ ====================
+let currentDate = new Date(); 
+let selectedDate = null;
+
+// Дефолтная структура данных (заменяет старый localStorage)
+let data = { 
+    shifts: {}, 
+    vacations: {}, 
+    vacationTotal: 28, 
+    financesByMonth: { 
+        "default": { rate: 41, vacation: 0, bonus: 0, taxMultiplier: 0.7025 } 
+    } 
+};
+
+const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+// ==================== АВТОРИЗАЦИЯ ====================
+auth.onAuthStateChanged(async (user) => {
+    const loginOverlay = document.getElementById('loginOverlay');
+    if (user) {
+        currentUser = user;
+        loginOverlay.classList.remove('active');
+        
+        // Загружаем данные пользователя из облака
+        try {
+            const docRef = db.collection("users").doc(user.uid);
+            const docSnap = await docRef.get();
+            if (docSnap.exists) {
+                data = docSnap.data(); // Заменяем дефолтные данные облачными
+            }
+        } catch (error) {
+            console.error("Ошибка загрузки данных:", error);
+            showToast("Ошибка соединения с базой!");
+        }
+        
+        // Запускаем интерфейс
+        init();
+    } else {
+        currentUser = null;
+        loginOverlay.classList.add('active');
+    }
+});
+
+function loginUser() {
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPassword').value;
+    const errBox = document.getElementById('loginError');
+    
+    auth.signInWithEmailAndPassword(email, pass)
+        .then(() => { errBox.style.display = 'none'; })
+        .catch(err => {
+            errBox.textContent = "Ошибка: Неверный email или пароль.";
+            errBox.style.display = 'block';
+        });
+}
+
+function logoutUser() {
+    auth.signOut().then(() => {
+        window.location.reload();
+    });
+}
+
+// ==================== НОВОЕ СОХРАНЕНИЕ ====================
+// Функция saveData() переписана с localStorage на Firestore
+function saveData() { 
+    if (currentUser) {
+        db.collection("users").doc(currentUser.uid).set(data)
+          .catch(error => {
+              console.error("Ошибка сохранения: ", error);
+              showToast("Ошибка сохранения в облако!");
+          });
+    }
+}
+
+// ==================== СТАРЫЕ ФУНКЦИИ БЕЗ ИЗМЕНЕНИЙ ====================
+function init() { 
+    document.getElementById('totalVacationDays').value = data.vacationTotal || 28; 
+    renderCalendar(); 
+    updateStats(); 
+    updateSettingsUI(); 
+}
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active'); 
+    event.currentTarget.classList.add('active');
+}
+
+function changeMonth(delta) { 
+    currentDate.setMonth(currentDate.getMonth() + delta); 
+    renderCalendar(); updateStats(); updateSettingsUI(); 
+}
+
+function getCurrentMonthKey() { 
+    return `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`; 
+}
+
+function getFinancesForCurrentMonth() {
+    const key = getCurrentMonthKey();
+    if (!data.financesByMonth[key]) {
+        let def = data.financesByMonth["default"];
+        let past = Object.keys(data.financesByMonth).filter(k => k !== 'default' && k < key).sort().reverse();
+        if (past.length > 0) def = data.financesByMonth[past[0]];
+        
+        data.financesByMonth[key] = { rate: def.rate, vacation: 0, bonus: 0, taxMultiplier: def.taxMultiplier }; 
+        saveData();
+    }
+    return data.financesByMonth[key];
+}
+
+function updateSettingsUI() {
+    const f = getFinancesForCurrentMonth();
+    document.getElementById('settingsMonthTitle').textContent = `💰 Финансы (${MONTHS[currentDate.getMonth()]} ${currentDate.getFullYear()})`;
+    document.getElementById('hourlyRate').value = f.rate; 
+    document.getElementById('vacationPay').value = f.vacation;
+    document.getElementById('bonusPay').value = f.bonus; 
+    document.getElementById('taxMultiplier').value = f.taxMultiplier;
+}
+
+function saveFinances() {
+    data.financesByMonth[getCurrentMonthKey()] = {
+        rate: parseFloat(document.getElementById('hourlyRate').value) || 0, 
+        vacation: parseFloat(document.getElementById('vacationPay').value) || 0,
+        bonus: parseFloat(document.getElementById('bonusPay').value) || 0, 
+        taxMultiplier: parseFloat(document.getElementById('taxMultiplier').value) || 0.7025
+    }; 
+    saveData(); updateStats(); showToast('Сохранено на этот месяц!');
+}
+
+function saveVacationTotal() { 
+    data.vacationTotal = parseInt(document.getElementById('totalVacationDays').value) || 28; 
+    saveData(); updateStats(); showToast('Лимит отпусков сохранен!'); 
+}
+
+function renderCalendar() {
+    const y = currentDate.getFullYear(), m = currentDate.getMonth();
+    document.getElementById('monthTitle').textContent = `${MONTHS[m]} ${y}`;
+    
+    const grid = document.getElementById('calendar'); 
+    grid.innerHTML = '';
+    
+    DAYS.forEach(d => { 
+        const h = document.createElement('div'); h.className = 'day-header'; h.textContent = d; grid.appendChild(h); 
+    });
+    
+    const firstDay = new Date(y, m, 1), lastDay = new Date(y, m + 1, 0);
+    const startOffset = (firstDay.getDay() + 6) % 7;
+    for (let i = 0; i < startOffset; i++) { 
+        const cell = document.createElement('div'); cell.className = 'day-cell empty'; grid.appendChild(cell); 
+    }
+    
+    const today = new Date();
+    
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+        const dateKey = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const cell = document.createElement('div'); cell.className = 'day-cell';
+        
+        const shift = data.shifts[dateKey]; const isVac = data.vacations[dateKey];
+        let hasOt = false, otDay = 0, otNight = 0;
+        
+        if (shift) {
+            otDay = parseFloat(shift.otDay) || 0; otNight = parseFloat(shift.otNight) || 0; hasOt = (otDay > 0 || otNight > 0);
+        }
+
+        if (isVac) cell.classList.add('vacation');
+        if (shift) { 
+            if (shift.type === 'weekend') cell.classList.add('weekend'); 
+            else if (shift.type === '1' || shift.type === '2') cell.classList.add('has-shift-' + shift.type); 
+            if (hasOt) cell.classList.add('has-overtime'); 
+        }
+        if (y === today.getFullYear() && m === today.getMonth() && day === today.getDate()) cell.classList.add('today');
+        
+        let html = `<div class="day-number">${day}</div><div class="day-content">`;
+        let totalHours = 0;
+        
+        if (isVac) {
+            html += `<span class="badge" style="background:#5a8ab0">Отпуск</span>`; totalHours = 8;
+        } else if (shift) {
+            if (shift.type === '1' || shift.type === '2') {
+                html += `<span class="badge" style="background:var(--shift-${shift.type})">${shift.type} shift</span>`; totalHours += 8;
+            }
+            if (hasOt) {
+                let otCalc = (shift.type === 'weekend') ? ((otDay + otNight) * 2) : ((otDay * 1.5) + (otNight * 2));
+                html += `<span class="badge" style="background:var(--overtime)">+${otCalc}ч</span>`; totalHours += otCalc;
+            }
+        }
+        
+        html += `</div>`;
+        if (totalHours > 0) html += `<div class="day-hours">Всего: ${totalHours}ч</div>`; 
+        
+        cell.innerHTML = html; cell.onclick = () => openShiftModal(dateKey); grid.appendChild(cell);
+    }
+}
+
+function updateStats() {
+    const y = currentDate.getFullYear(), m = currentDate.getMonth();
+    let reg=0, ot=0, sh=0, vacMonth=0, vacTotalUsed=0;
+    
+    Object.keys(data.vacations).forEach(k => { if(data.vacations[k]) vacTotalUsed++; });
+    
+    for (let day = 1; day <= new Date(y, m + 1, 0).getDate(); day++) {
+        const k = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        if (data.shifts[k]) { 
+            const s = data.shifts[k]; 
+            if (s.type === '1' || s.type === '2') { reg += 8; sh++; } 
+            let otDay = parseFloat(s.otDay) || 0, otNight = parseFloat(s.otNight) || 0;
+            if (s.type === 'weekend') ot += (otDay + otNight) * 2; else ot += (otDay * 1.5) + (otNight * 2);
+        }
+        if (data.vacations[k]) vacMonth++;
+    }
+    
+    const f = getFinancesForCurrentMonth();
+    const finalSalary = (((reg + ot) * f.rate) + (vacMonth * f.vacation) + f.bonus) * f.taxMultiplier;
+    
+    document.getElementById('statSalary').textContent = finalSalary.toFixed(2) + ' zł';
+    document.getElementById('statWorkHours').textContent = reg; 
+    document.getElementById('statOvertime').textContent = ot;
+    
+    const totalV = Number(data.vacationTotal) || 28;
+    const remain = Math.max(0, totalV - vacTotalUsed);
+    document.getElementById('statVacationGlobal').textContent = `${remain} / ${totalV}`;
+    document.getElementById('statVacationMonth').textContent = `В этом месяце: ${vacMonth}`;
+}
+
+function openShiftModal(dateKey) { 
+    selectedDate = dateKey; const s = data.shifts[dateKey] || {}; 
+    document.getElementById('modalDate').textContent = dateKey.split('-').reverse().join('.'); 
+    const r = document.querySelector(`input[name="dayType"][value="${s.type || 'weekend'}"]`); 
+    if (r) r.checked = true; 
+    document.getElementById('otDay').value = s.otDay || ''; 
+    document.getElementById('otNight').value = s.otNight || ''; 
+    document.getElementById('shiftModal').classList.add('active'); 
+}
+
+function saveShift() { 
+    if (!selectedDate) return; 
+    data.shifts[selectedDate] = { 
+        type: document.querySelector('input[name="dayType"]:checked').value, 
+        otDay: parseFloat(document.getElementById('otDay').value) || 0, 
+        otNight: parseFloat(document.getElementById('otNight').value) || 0 
+    }; 
+    delete data.vacations[selectedDate]; 
+    saveData(); renderCalendar(); updateStats(); closeModal('shiftModal'); showToast('Сохранено!'); 
+}
+
+function clearDay() { 
+    if (!selectedDate) return; 
+    delete data.shifts[selectedDate]; delete data.vacations[selectedDate]; 
+    saveData(); renderCalendar(); updateStats(); closeModal('shiftModal'); showToast('День очищен!'); 
+}
+
+function openBulkModal() { 
+    const t = new Date(); 
+    document.getElementById('bulkStart').value = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; 
+    document.getElementById('bulkEnd').value = ''; 
+    document.getElementById('bulkModal').classList.add('active'); 
+}
+
+function saveBulk() { 
+    const s = document.getElementById('bulkStart').value, e = document.getElementById('bulkEnd').value; 
+    if (!s || !e) return; 
+    let type = document.querySelector('input[name="bulkType"]:checked').value; 
+    for(let d = new Date(s); d <= new Date(e); d.setDate(d.getDate() + 1)) { 
+        if (d.getDay() === 0 || d.getDay() === 6) continue; 
+        const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
+        if (!data.vacations[k]) data.shifts[k] = { type: type, otDay: 0, otNight: 0 }; 
+    } 
+    saveData(); renderCalendar(); updateStats(); closeModal('bulkModal'); showToast('График заполнен!'); 
+}
+
+function openVacationModal() { 
+    document.getElementById('vacationStart').value = ''; document.getElementById('vacationEnd').value = '';
+    document.getElementById('vacationModal').classList.add('active'); 
+}
+
+function saveVacation() { 
+    const s = document.getElementById('vacationStart').value, e = document.getElementById('vacationEnd').value; 
+    if (!s || !e) return; 
+    for (let d = new Date(s); d <= new Date(e); d.setDate(d.getDate() + 1)) { 
+        const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
+        data.vacations[k] = true; delete data.shifts[k]; 
+    } 
+    saveData(); renderCalendar(); updateStats(); closeModal('vacationModal'); showToast('Отпуск добавлен!'); 
+}
+
+function openVacationListModal() {
+    const container = document.getElementById('vacationListContainer'), summary = document.getElementById('vacationListSummary');
+    let vacTotalUsed = 0; Object.keys(data.vacations).forEach(k => { if(data.vacations[k]) vacTotalUsed++; });
+    const totalV = Number(data.vacationTotal) || 28, remain = Math.max(0, totalV - vacTotalUsed);
+    
+    summary.innerHTML = `<strong>Всего положено:</strong> ${totalV} дн.<br><strong>Использовано:</strong> ${vacTotalUsed} дн.<br><strong>Осталось:</strong> ${remain} дн.`;
+    const dates = Object.keys(data.vacations).filter(d => data.vacations[d]).sort();
+    
+    if (!dates.length) { 
+        container.innerHTML = '<p style="color:var(--text-light); text-align:center; padding: 20px 0;">Отпусков пока нет.</p>'; 
+    } else {
+        let curM = '', html = '';
+        dates.forEach(ds => {
+            const d = new Date(ds), my = `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+            if (my !== curM) { 
+                if(curM) html += `</div></div>`; 
+                html += `<div class="vacation-month-group"><div class="vacation-month-title">${my}</div><div class="vacation-days-container">`; 
+                curM = my; 
+            }
+            html += `<span class="vacation-day-badge">${d.getDate()} число</span>`;
+        });
+        container.innerHTML = html + `</div></div>`;
+    }
+    document.getElementById('vacationListModal').classList.add('active');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function showToast(m) { 
+    const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); 
+    setTimeout(() => t.classList.remove('show'), 2500); 
+}
+</script>
+</body>
+</html>
