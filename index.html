@@ -11,22 +11,71 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
     <style>
+        /* === СВЕТЛАЯ ТЕМА (По умолчанию) === */
         :root {
             --bg: #f2f2f7; 
-            --card: rgba(255, 255, 255, 0.85); 
+            --card: rgba(255, 255, 255, 0.65); 
             --text: #1c1c1e; 
             --text-light: #8e8e93;
             --accent: #007aff; 
-            --accent-light: #e5f1ff; 
-            --overtime: #ff9500;
-            --weekend: #e5e5ea; 
-            --vacation: #e8f2ff; 
-            --shift-1: #007aff; 
-            --shift-2: #af52de;
+            --accent-light: rgba(0, 122, 255, 0.1); 
             --border: rgba(60, 60, 67, 0.12); 
-            --shadow: 0 8px 24px rgba(0, 0, 0, 0.04); 
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.04); 
             --salary: #34c759;
+            --glass-blur: blur(25px);
+
+            /* Пастельная палитра фич */
+            --weekend: rgba(229, 229, 234, 0.5); 
+            --shift-1-bg: rgba(0, 122, 255, 0.12);
+            --shift-1-text: #007aff;
+            --shift-2-bg: rgba(175, 82, 222, 0.12);
+            --shift-2-text: #af52de;
+            --overtime-bg: rgba(255, 149, 0, 0.12);
+            --overtime-text: #ff9500;
+            --vacation-bg: rgba(90, 200, 250, 0.15);
+            --vacation-text: #008cc9;
+            --okolicznosciowy-bg: rgba(255, 45, 85, 0.12);
+            --okolicznosciowy-text: #ff2d55;
+            --sila-bg: rgba(209, 134, 54, 0.15);
+            --sila-text: #d18636;
+            --l4-bg: rgba(255, 107, 107, 0.15);
+            --l4-text: #ff6b6b;
+            --bezplatny-bg: rgba(142, 142, 147, 0.15);
+            --bezplatny-text: #8e8e93;
         }
+
+        /* === ТЁМНАЯ ТЕМА === */
+        [data-theme="dark"] {
+            --bg: #121214; 
+            --card: rgba(30, 30, 35, 0.75); 
+            --text: #f2f2f7; 
+            --text-light: #98989d;
+            --accent: #0a84ff; 
+            --accent-light: rgba(10, 132, 255, 0.15); 
+            --border: rgba(255, 255, 255, 0.1); 
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.2); 
+            --salary: #30d158;
+            --weekend: rgba(44, 44, 46, 0.5);
+
+            /* Пастельная палитра для Dark Mode */
+            --shift-1-bg: rgba(10, 132, 255, 0.2);
+            --shift-1-text: #64d2ff;
+            --shift-2-bg: rgba(191, 90, 242, 0.2);
+            --shift-2-text: #bf5af2;
+            --overtime-bg: rgba(255, 159, 10, 0.2);
+            --overtime-text: #ff9f0a;
+            --vacation-bg: rgba(100, 210, 255, 0.2);
+            --vacation-text: #64d2ff;
+            --okolicznosciowy-bg: rgba(255, 55, 95, 0.2);
+            --okolicznosciowy-text: #ff375f;
+            --sila-bg: rgba(217, 144, 62, 0.2);
+            --sila-text: #e29b4e;
+            --l4-bg: rgba(255, 117, 117, 0.2);
+            --l4-text: #ff8585;
+            --bezplatny-bg: rgba(152, 152, 157, 0.2);
+            --bezplatny-text: #98989d;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif; 
@@ -37,307 +86,378 @@
             margin: 0 auto; 
             line-height: 1.4;
             letter-spacing: -0.01em;
-            padding-bottom: 80px; 
+            padding-bottom: 120px; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
         }
         
-        /* Стилизованный заголовок с кнопкой настроек */
-        .app-header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-        }
-        .app-header { 
-            font-weight: 700; 
-            font-size: 2.2rem; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-            letter-spacing: -0.03em;
-        }
+        /* Заголовок */
+        .app-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; transition: all 0.4s ease; }
+        .app-header { font-weight: 700; font-size: 2.2rem; display: flex; align-items: center; gap: 10px; letter-spacing: -0.03em; }
         .app-header span { color: var(--accent); }
-        .app-header-icon { 
-            background: var(--accent); 
-            color: white; 
-            border-radius: 12px; 
-            width: 42px; 
-            height: 42px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 1.5rem; 
-            box-shadow: 0 4px 14px rgba(0, 122, 255, 0.3);
-        }
-
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+        
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.99) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 
-        /* Дашборд */
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; }
-        .stat-card { background: var(--card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 18px; padding: 18px 20px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: all 0.25s ease; }
+        /* Чистый дашборд */
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px; transition: all 0.4s ease; }
+        .stat-card { background: var(--card); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-radius: 18px; padding: 22px 20px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: all 0.25s ease; }
         .stat-card.clickable { cursor: pointer; }
-        .stat-card.clickable:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
-        .stat-card.highlight { border-color: rgba(52, 199, 89, 0.4); background: rgba(255, 255, 255, 0.95); }
+        .stat-card.clickable:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.08); background: var(--card); }
+        .stat-card.highlight { border-color: rgba(52, 199, 89, 0.4); }
         .stat-card.highlight .value { color: var(--salary); }
         .stat-card .label { font-size: 0.75rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.03em; display: flex; justify-content: space-between; align-items: center; }
-        .stat-card .value { font-size: 1.8rem; font-weight: 700; margin-top: 6px; letter-spacing: -0.03em; }
-        .stat-card .sub { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; }
+        .stat-card .value { font-size: 1.9rem; font-weight: 700; margin-top: 8px; letter-spacing: -0.03em; }
 
-        /* Панель инструментов календаря (Toolbar) */
-        .calendar-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 20px;
-            background: rgba(255,255,255, 0.5);
-            padding: 12px 16px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
+        /* Смарт-панель */
+        .calendar-toolbar-minimal { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 4px; position: relative; flex-wrap: wrap; gap: 12px; }
+        .month-nav { display: flex; align-items: center; gap: 4px; z-index: 10; transition: all 0.4s ease; }
+        .month-nav h2 { font-weight: 700; font-size: 1.4rem; min-width: 150px; text-align: center; margin: 0; cursor: pointer; transition: color 0.2s; }
+        .month-nav h2:hover { color: var(--accent); }
+
+        .btn { padding: 9px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; font-weight: 600; background: var(--card); border: 1px solid var(--border); color: var(--text); transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); display: inline-flex; align-items: center; justify-content: center; gap: 6px; backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
+        .btn:hover { background: var(--accent-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: var(--accent); border-color: var(--accent); }
+        .btn:active { transform: translateY(0) scale(0.97); }
+        .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+        .btn-primary:hover { background: #0062cc; color: white; }
+        .btn-danger { color: #ff3b30; }
+        
+        .btn-icon-nav { width: 38px; height: 38px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; border: 1px solid var(--border); background: var(--card); cursor: pointer; color: var(--text); transition: 0.2s; box-shadow: var(--shadow); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
+        .btn-icon-nav:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+        /* Выпадающее смарт-меню */
+        .smart-dropdown { display: none; flex-direction: column; position: absolute; right: 0; top: calc(100% + 8px); background: var(--card); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); padding: 10px; width: 220px; z-index: 50; }
+        .smart-dropdown.active { display: flex; animation: dropDownAnim 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); transform-origin: top right; }
+        @keyframes dropDownAnim { from { opacity: 0; transform: scale(0.95) translateY(-5px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .dropdown-item { width: 100%; text-align: left; background: transparent; border: none; padding: 12px; border-radius: 12px; font-size: 0.9rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text); transition: 0.15s; }
+        .dropdown-item:hover { background: var(--accent-light); color: var(--accent); }
+        .dropdown-divider { height: 1px; background: var(--border); margin: 6px 4px; }
+
+        /* Фокус-режим (Edit Mode) */
+        body.focus-mode .app-header-container,
+        body.focus-mode .dashboard,
+        body.focus-mode .fab-update,
+        body.focus-mode .calendar-toolbar-minimal .btn-tools {
+            opacity: 0.25;
+            filter: blur(6px);
+            pointer-events: none;
+        }
+        body.focus-mode .calendar-grid {
+            transform: scale(1.01);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .month-nav { display: flex; align-items: center; gap: 8px; }
-        .month-nav h2 { font-weight: 700; font-size: 1.3rem; min-width: 150px; text-align: center; letter-spacing: -0.01em; }
+        /* Плавающий Dock для режима кисти */
+        .edit-dock { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: var(--card); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); padding: 12px 16px; border-radius: 100px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); border: 1px solid var(--border); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; opacity: 0; pointer-events: none; }
+        .edit-dock.active { bottom: 40px; opacity: 1; pointer-events: auto; }
+        
+        .dock-divider { width: 1px; height: 30px; background: var(--border); margin: 0 4px; }
+        
+        .edit-tool-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: var(--text); font-size: 1.1rem; cursor: pointer; transition: 0.2s; position: relative; }
+        .edit-tool-btn:hover { background: var(--accent-light); }
+        .edit-tool-btn.active { background: var(--text); color: var(--bg); box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: scale(1.1); }
+        
+        .action-btn-circle { width: 44px; height: 44px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: 0.2s; font-weight: 700; }
+        .action-btn-cancel { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+        .action-btn-cancel:hover { background: #ff3b30; color: white; transform: scale(1.05); }
+        .action-btn-save { background: rgba(52, 199, 89, 0.1); color: #34c759; }
+        .action-btn-save:hover { background: #34c759; color: white; transform: scale(1.05); }
 
-        .btn { padding: 9px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; font-weight: 600; background: var(--card); border: 1px solid var(--border); color: var(--text); transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); display: inline-flex; align-items: center; gap: 6px; }
-        .btn:hover { background: #ffffff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .btn:active { transform: translateY(0) scale(0.97); }
-        .btn-primary { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 14px rgba(0, 122, 255, 0.22); }
-        .btn-primary:hover { background: #0062cc; box-shadow: 0 6px 18px rgba(0, 122, 255, 0.32); }
-        .btn-danger { color: #ff3b30; }
-        .btn-icon { width: 38px; height: 38px; padding: 0; justify-content: center; border-radius: 50%; font-size: 1.1rem; }
-
-        /* Segmented Control "В 1 клик" */
-        .quick-tools-panel { display: inline-flex; align-items: center; background: rgba(120, 120, 128, 0.12); padding: 3px; border-radius: 10px; gap: 2px; }
-        .quick-tool-btn { padding: 6px 12px; border: none; background: transparent; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: var(--text-light); cursor: pointer; transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; align-items: center; gap: 5px; }
-        .quick-tool-btn:hover { color: var(--text); }
-        .quick-tool-btn.active { background: #ffffff; color: var(--text); box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.04); }
-        .quick-tool-btn.active[data-tool="clear"] { color: #ff3b30; }
-
-        /* Плавающая кнопка Update */
-        .fab-update { position: fixed; bottom: 30px; right: 30px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); color: var(--accent); padding: 10px 20px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 90; display: flex; align-items: center; gap: 6px; }
-        .fab-update:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 35px rgba(0, 122, 255, 0.2); background: #ffffff; }
-
-        /* Календарь */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 28px; }
+        /* Календарь и Ячейки */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 28px; transition: all 0.4s ease; }
         .day-header { text-align: center; font-size: 0.75rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; padding: 4px 0; }
-        .day-cell { background: var(--card); backdrop-filter: blur(10px); border-radius: 14px; min-height: 96px; padding: 10px; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; }
-        .day-cell:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(0,0,0,0.06); background: #ffffff; z-index: 2; }
-        .day-cell.empty { background: transparent; border-color: transparent; pointer-events: none; }
-        .day-cell.weekend { background: rgba(229, 229, 234, 0.4); }
-        .day-cell.vacation { background: rgba(0, 122, 255, 0.08); border-color: rgba(0, 122, 255, 0.2); }
-        .day-cell.has-shift-1 { border-color: rgba(0, 122, 255, 0.4); background: rgba(0, 122, 255, 0.03); }
-        .day-cell.has-shift-2 { border-color: rgba(175, 82, 222, 0.4); background: rgba(175, 82, 222, 0.03); }
-        .day-cell.has-overtime { border-bottom: 3px solid var(--overtime); }
+        .day-cell { position: relative; background: var(--card); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border-radius: 14px; min-height: 96px; padding: 10px; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; overflow: hidden; }
+        .day-cell:hover { transform: scale(1.03); box-shadow: 0 10px 25px rgba(0,0,0,0.08); z-index: 2; border-color: var(--accent); }
+        .day-cell.empty { background: transparent; border-color: transparent; pointer-events: none; backdrop-filter: none; box-shadow: none; }
+        .day-cell.weekend { background: var(--weekend); }
+        
         .day-cell.today .day-number { background: #ff3b30; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
         .day-number { font-size: 0.85rem; font-weight: 600; color: var(--text); }
-        .day-content { font-size: 0.75rem; margin-top: 6px; display: flex; flex-direction: column; gap: 3px; align-items: flex-start; }
-        .badge { padding: 3px 7px; border-radius: 6px; font-size: 0.68rem; font-weight: 600; color: white; letter-spacing: -0.01em; }
+        .day-content { font-size: 0.75rem; margin-top: 6px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; letter-spacing: -0.01em; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
         .day-hours { font-size: 0.7rem; font-weight: 500; color: var(--text-light); margin-top: auto; padding-top: 6px; }
 
+        .delete-btn-inline { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.9); color: white; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; cursor: pointer; border: none; opacity: 0; transition: opacity 0.2s, transform 0.2s; box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3); backdrop-filter: blur(4px); }
+        .day-cell:hover .delete-btn-inline { opacity: 1; }
+        .delete-btn-inline:hover { transform: scale(1.15); background: #ff3b30; }
+
         /* Модальные окна */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.25); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
-        .modal-overlay.active { display: flex; }
-        .modal { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(25px); border-radius: 24px; padding: 28px; width: 90%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.18); border: 1px solid rgba(255,255,255,0.5); max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
-        .modal h3 { font-weight: 700; font-size: 1.3rem; margin-bottom: 18px; letter-spacing: -0.02em; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .modal-overlay.active { display: flex; animation: fadeInModal 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        @keyframes fadeInModal { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(12px); } }
+        .modal { background: var(--card); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-radius: 24px; padding: 28px; width: 90%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; transform: scale(0.98); transition: 0.3s; }
+        .modal-overlay.active .modal { transform: scale(1); }
+        .modal h3 { font-weight: 700; font-size: 1.3rem; margin-bottom: 18px; letter-spacing: -0.02em; color: var(--text); }
+        
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-light); margin-bottom: 6px; }
-        .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; font-family: inherit; font-size: 0.95rem; background: rgba(242, 242, 247, 0.7); outline: none; transition: 0.2s; }
-        .form-group input:focus { border-color: var(--accent); background: #ffffff; }
-        .radio-options { display: flex; flex-direction: column; gap: 8px; }
-        .radio-option { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(242, 242, 247, 0.7); border: 1px solid transparent; border-radius: 12px; cursor: pointer; font-weight: 500; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; font-family: inherit; font-size: 0.95rem; background: var(--bg); color: var(--text); outline: none; transition: 0.2s; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+        
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
         .modal-actions .btn { flex: 1; justify-content: center; }
 
-        /* Вход и прочее */
-        #loginOverlay { background: var(--bg); backdrop-filter: none; z-index: 999; }
-        #loginOverlay .modal { text-align: center; }
-        #loginOverlay input { margin-bottom: 12px; }
-        .error-msg { color: #ff3b30; font-size: 0.85rem; margin-bottom: 12px; display: none; font-weight: 500; }
-        
-        .settings-section { background: var(--card); backdrop-filter: blur(20px); border-radius: 18px; padding: 22px; margin-bottom: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-        .vacation-month-group { margin-bottom: 16px; }
-        .vacation-month-title { font-size: 0.9rem; color: var(--accent); margin-bottom: 8px; font-weight: 700; }
-        .vacation-days-container { display: flex; flex-wrap: wrap; gap: 8px; }
-        .vacation-day-badge { background: var(--vacation); border: 1px solid rgba(0,122,255,0.2); color: var(--accent); padding: 5px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; }
+        /* Segmented Control */
+        .segmented-control { display: flex; background: rgba(120, 120, 128, 0.16); border-radius: 12px; padding: 3px; margin-bottom: 20px; }
+        .segmented-control input { display: none; }
+        .segmented-control label { flex: 1; text-align: center; padding: 8px 4px; font-size: 0.85rem; font-weight: 600; color: var(--text); border-radius: 10px; cursor: pointer; transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .segmented-control input:checked + label { background: var(--card); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
 
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(28, 28, 30, 0.9); backdrop-filter: blur(10px); color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; font-weight: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); pointer-events: none; z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        /* iOS Style Settings Lists */
+        .ios-list-header { font-size: 0.75rem; text-transform: uppercase; color: var(--text-light); font-weight: 600; margin-bottom: 6px; padding-left: 12px; margin-top: 24px; letter-spacing: 0.02em; }
+        .ios-list { background: var(--card); backdrop-filter: var(--glass-blur); border-radius: 12px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); }
+        .ios-list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+        .ios-list-item:last-child { border-bottom: none; }
+        .ios-list-item label { font-weight: 500; font-size: 0.95rem; color: var(--text); margin: 0; }
+        .ios-list-item input { text-align: right; border: none; background: transparent; font-size: 0.95rem; color: var(--text-light); width: 100px; outline: none; padding: 0; margin: 0; font-weight: 600; }
+        .ios-list-item input:focus { color: var(--accent); }
+
+        /* Плавающая кнопка Update */
+        .fab-update { position: fixed; bottom: 30px; right: 30px; background: var(--card); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--border); color: var(--accent); padding: 12px 22px; border-radius: 30px; font-weight: 700; font-size: 0.95rem; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.15); transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 990; display: flex; align-items: center; gap: 6px; }
+        .fab-update:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 35px rgba(0, 122, 255, 0.25); background: var(--accent-light); }
+
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px); color: white; padding: 12px 24px; border-radius: 30px; font-size: 0.9rem; font-weight: 500; opacity: 0; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); pointer-events: none; z-index: 3000; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
         @media (max-width: 768px) {
-            .calendar-grid { gap: 4px; } .day-cell { min-height: 75px; padding: 6px; border-radius: 10px; } .day-number { font-size: 0.75rem; } body { padding: 16px 12px; padding-bottom: 80px; } 
-            .calendar-toolbar { justify-content: center; } .fab-update { bottom: 20px; right: 20px; padding: 8px 16px; font-size: 0.8rem; }
+            .calendar-grid { gap: 4px; } .day-cell { min-height: 75px; padding: 6px; border-radius: 10px; } .day-number { font-size: 0.75rem; } body { padding: 16px 12px; padding-bottom: 120px; } 
+            .fab-update { bottom: 20px; right: 20px; padding: 10px 18px; font-size: 0.85rem; }
         }
     </style>
 </head>
 <body>
 
     <!-- ЭКРАН ВХОДА -->
-    <div class="modal-overlay active" id="loginOverlay">
+    <div class="modal-overlay active" id="loginOverlay" style="z-index: 4000;">
         <div class="modal">
             <h3>🔐 Вход в систему</h3>
             <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Введите email и пароль от аккаунта.</p>
-            <div class="error-msg" id="loginError"></div>
-            <input type="email" id="loginEmail" placeholder="Email" autocomplete="username">
-            <input type="password" id="loginPassword" placeholder="Пароль" autocomplete="current-password">
-            <button class="btn btn-primary" onclick="loginUser()" style="width: 100%; margin-top: 10px; justify-content:center;">Войти</button>
+            <div class="error-msg" id="loginError" style="color:#ff3b30; margin-bottom: 10px; font-size: 0.85rem; display: none;"></div>
+            <input type="email" id="loginEmail" placeholder="Email" autocomplete="username" style="margin-bottom: 10px; width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            <input type="password" id="loginPassword" placeholder="Пароль" autocomplete="current-password" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            <button class="btn btn-primary" onclick="loginUser()" style="width: 100%; margin-top: 16px;">Войти</button>
         </div>
     </div>
 
-    <!-- Обновленный Заголовок -->
+    <!-- Заголовок -->
     <div class="app-header-container">
         <div class="app-header">
             <div class="app-header-icon">📅</div>
             Shift<span>Calendar</span>
         </div>
-        <!-- Кнопка перехода в Настройки -->
-        <button class="btn btn-icon" onclick="switchTab('settings')" title="Настройки">⚙️</button>
+        <div class="header-actions">
+            <button class="btn-icon-nav" onclick="toggleTheme()" title="Сменить тему" id="themeToggleBtn">☀️</button>
+            <button class="btn-icon-nav" onclick="switchTab('settings')" title="Настройки">⚙️</button>
+        </div>
     </div>
 
     <!-- Вкладка КАЛЕНДАРЬ -->
     <div id="tab-calendar" class="tab-content active">
         <div class="dashboard">
             <div class="stat-card highlight clickable" onclick="openSalaryModal()">
-                <div class="label">
-                    <span>Примерная ЗП</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </div>
+                <div class="label"><span>Примерная ЗП</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
                 <div class="value" id="statSalary">0 zł</div>
-                <div class="sub" id="salaryFormulaSub">налог. коэф. x0.7025</div>
             </div>
             <div class="stat-card">
-                <div class="label">Рабочие часы</div>
+                <div class="label"><span>Рабочие часы</span></div>
                 <div class="value" id="statWorkHours">0</div>
-                <div class="sub">обычные смены</div>
             </div>
             <div class="stat-card">
-                <div class="label">Переработки</div>
+                <div class="label"><span>Переработки</span></div>
                 <div class="value" id="statOvertime">0</div>
-                <div class="sub">в часах</div>
             </div>
             <div class="stat-card clickable" onclick="openVacationListModal()">
-                <div class="label">
-                    <span>Отпуск (Остаток)</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </div>
+                <div class="label"><span>Отпуск (Остаток)</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
                 <div class="value" id="statVacationGlobal">0 / 0</div>
-                <div class="sub" id="statVacationMonth">В этом месяце: 0</div>
             </div>
         </div>
 
-        <!-- Единая панель управления календарем -->
-        <div class="calendar-toolbar">
-            <!-- Кнопка вызова меню действий -->
-            <button class="btn btn-primary" onclick="openModal('actionsMenuModal')" style="border-radius: 16px; padding: 10px 18px;">➕ Действия</button>
-            
-            <!-- Навигация -->
+        <div class="calendar-toolbar-minimal">
             <div class="month-nav">
-                <button class="btn btn-icon" onclick="changeMonth(-1)">←</button>
-                <h2 id="monthTitle"></h2>
-                <button class="btn btn-icon" onclick="changeMonth(1)">→</button>
+                <button class="btn-icon-nav" onclick="changeMonth(-1)">←</button>
+                <h2 id="monthTitle" onclick="openMonthPicker()" title="Выбрать месяц"></h2>
+                <button class="btn-icon-nav" onclick="changeMonth(1)">→</button>
             </div>
 
-            <!-- Режим 1 клика переехал сюда -->
-            <div class="quick-tools-panel">
-                <button class="quick-tool-btn active" data-tool="off" onclick="selectQuickTool(this, 'off')">👆 Меню</button>
-                <button class="quick-tool-btn" data-tool="1" onclick="selectQuickTool(this, '1')">1️⃣ 1 shift</button>
-                <button class="quick-tool-btn" data-tool="2" onclick="selectQuickTool(this, '2')">2️⃣ 2 shift</button>
-                <button class="quick-tool-btn" data-tool="weekend" onclick="selectQuickTool(this, 'weekend')">☕ Выходной</button>
-                <button class="quick-tool-btn" data-tool="clear" onclick="selectQuickTool(this, 'clear')">❌ Стереть</button>
+            <div style="position: relative;">
+                <button class="btn btn-tools" onclick="toggleSmartDropdown(event)">
+                    <span style="font-weight: 500;">🛠 Инструменты</span> ▾
+                </button>
+                
+                <div class="smart-dropdown" id="smartDropdown">
+                    <button class="dropdown-item" style="color: var(--accent);" onclick="closeSmartDropdown(); enterFocusMode()">🎨 Режим в 1 клик</button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" onclick="closeSmartDropdown(); openAbsenceModal()">🏖️ Добавить отсутствие</button>
+                    <button class="dropdown-item" onclick="closeSmartDropdown(); openModal('bulkModal')">🗓️ Массовое заполнение</button>
+                </div>
             </div>
         </div>
         
         <div class="calendar-grid" id="calendar"></div>
     </div>
 
-    <!-- Вкладка НАСТРОЙКИ -->
+    <!-- Вкладка НАСТРОЙКИ (iOS Style) -->
     <div id="tab-settings" class="tab-content">
-        <!-- Кнопка возврата в календарь -->
-        <button class="btn" onclick="switchTab('calendar')" style="margin-bottom: 24px;">← Назад в календарь</button>
+        <button class="btn" onclick="switchTab('calendar')" style="margin-bottom: 12px;">← Назад в календарь</button>
+        <h2 id="settingsMonthTitle" style="margin-bottom: 24px; font-weight: 700;">💰 Финансы</h2>
 
-        <div class="settings-section">
-            <h3 id="settingsMonthTitle">💰 Финансы</h3>
-            <div class="form-group"><label>Почасовая ставка:</label><input type="number" id="hourlyRate" step="0.1"></div>
-            <div class="form-group"><label>Сумма за 1 день отпуска:</label><input type="number" id="vacationPay" step="1"></div>
-            <div class="form-group"><label>Премия (Брутто):</label><input type="number" id="bonusPay" step="1"></div>
-            <div class="form-group"><label>Налог. коэф. (Netto):</label><input type="number" id="taxMultiplier" step="0.0001"></div>
-            <button class="btn btn-primary" onclick="saveFinances()">Сохранить на этот месяц</button>
-        </div>
-        <div class="settings-section">
-            <h3>⚙️ Дней отпуска в год</h3>
-            <div style="display:flex; gap:10px;">
-                <input type="number" id="totalVacationDays" style="width: 100px;">
-                <button class="btn btn-primary" onclick="saveVacationTotal()">Сохранить</button>
+        <div class="ios-list-header">Оплата труда</div>
+        <div class="ios-list">
+            <div class="ios-list-item">
+                <label>Почасовая ставка (Брутто)</label>
+                <input type="number" id="hourlyRate" step="0.1" placeholder="0.0">
+            </div>
+            <div class="ios-list-item">
+                <label>Премия Брутто (zł)</label>
+                <input type="number" id="bonusPay" step="1" placeholder="0">
             </div>
         </div>
-        <div class="settings-section">
-            <h3>👤 Аккаунт</h3>
-            <div class="controls-group">
-                <button class="btn btn-danger" onclick="logoutUser()">🚪 Выйти из аккаунта</button>
+
+        <div class="ios-list-header">База отпускных</div>
+        <div class="ios-list">
+            <div class="ios-list-item">
+                <label>Сумма за 1 день отпуска (100%)</label>
+                <input type="number" id="vacationPay" step="1" placeholder="0">
             </div>
         </div>
+
+        <div class="ios-list-header">Коэффициенты (Kodeks Pracy)</div>
+        <div class="ios-list">
+            <div class="ios-list-item">
+                <label>Налоговый коэф. (Netto)</label>
+                <input type="number" id="taxMultiplier" step="0.0001" placeholder="0.7025">
+            </div>
+            <div class="ios-list-item">
+                <label>Больничный (L4)</label>
+                <input type="number" id="l4Multiplier" step="0.01" placeholder="0.80">
+            </div>
+            <div class="ios-list-item">
+                <label>Siła wyższa (Форс-мажор)</label>
+                <input type="number" id="silaMultiplier" step="0.01" placeholder="0.50">
+            </div>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; margin-bottom: 24px;" onclick="saveFinances()">Сохранить финансы на этот месяц</button>
+
+        <div class="ios-list-header">Общие настройки</div>
+        <div class="ios-list">
+            <div class="ios-list-item">
+                <label>Дней отпуска в год</label>
+                <input type="number" id="totalVacationDays" style="width: 60px;">
+            </div>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-bottom: 32px;" onclick="saveVacationTotal()">Обновить лимит</button>
+
+        <button class="btn btn-danger" style="width: 100%;" onclick="logoutUser()">Выйти из аккаунта</button>
     </div>
 
-    <!-- Плавающая кнопка Обновлений -->
+    <!-- Плавающая кнопка Update -->
     <button class="fab-update" onclick="openModal('changelogModal')">✨ Что нового</button>
 
-    <!-- МОДАЛЬНЫЕ ОКНА -->
-
-    <!-- Новое меню дополнительных действий -->
-    <div class="modal-overlay" id="actionsMenuModal">
-        <div class="modal" style="text-align: center; max-width: 320px;">
-            <h3>➕ Выберите действие</h3>
-            <div style="display:flex; flex-direction:column; gap:12px; margin-top:20px;">
-                <button class="btn" style="justify-content:center; padding:14px; background:var(--vacation); color:var(--accent); border:none;" onclick="closeModal('actionsMenuModal'); openModal('vacationModal')">🏖️ Добавить отпуск</button>
-                <button class="btn" style="justify-content:center; padding:14px; background:var(--accent-light); color:var(--accent); border:none;" onclick="closeModal('actionsMenuModal'); openBulkModal()">🗓️ Массовое заполнение</button>
-            </div>
-            <button class="btn" style="margin-top:20px; width:100%; justify-content:center;" onclick="closeModal('actionsMenuModal')">Отмена</button>
-        </div>
+    <!-- Плавающий Dock для Focus Mode -->
+    <div class="edit-dock" id="editDock">
+        <button class="action-btn-circle action-btn-cancel" onclick="exitFocusMode(false)" title="Отменить">✕</button>
+        <div class="dock-divider"></div>
+        <button class="edit-tool-btn active" data-tool="1" onclick="setEditTool(this, '1')" title="1 shift">1️⃣</button>
+        <button class="edit-tool-btn" data-tool="2" onclick="setEditTool(this, '2')" title="2 shift">2️⃣</button>
+        <button class="edit-tool-btn" data-tool="weekend" onclick="setEditTool(this, 'weekend')" title="Выходной">☕</button>
+        <button class="edit-tool-btn" data-tool="clear" onclick="setEditTool(this, 'clear')" title="Стереть">🧹</button>
+        <div class="dock-divider"></div>
+        <button class="action-btn-circle action-btn-save" onclick="exitFocusMode(true)" title="Сохранить">✓</button>
     </div>
 
+    <!-- Окно Что Нового -->
     <div class="modal-overlay" id="changelogModal">
-        <div class="modal">
+        <div class="modal" style="max-height: 85vh;">
             <h3>🚀 Обновление ShiftCalendar</h3>
-            <ul style="padding-left: 20px; margin-bottom: 24px; font-size: 0.9rem; color: var(--text); line-height: 1.6; display:flex; flex-direction:column; gap:8px;">
-                <li><strong>Умная навигация:</strong> Мы избавились от старых вкладок. Календарь стал цельным рабочим пространством, а настройки переехали под шестеренку в правом верхнем углу.</li>
-                <li><strong>Меню действий:</strong> Функции массового заполнения и отпуска теперь аккуратно спрятаны под новой кнопкой «➕ Действия».</li>
-                <li><strong>Все инструменты под рукой:</strong> Переключатель «В 1 клик» теперь логично располагается рядом со стрелками месяцев. Легенду убрали за ненадобностью!</li>
+            <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:16px;">Мы полностью переработали приложение, сделав его быстрее, чище и умнее. Главные фишки:</p>
+            <ul style="padding-left: 20px; margin-bottom: 24px; font-size: 0.9rem; color: var(--text); line-height: 1.6; display:flex; flex-direction:column; gap:12px;">
+                <li>🎯 <strong>Фокус-режим в 1 клик:</strong> Нажмите «Режим в 1 клик» в инструментах, и приложение перейдет в режим глубокого редактирования. Дашборд изящно размоется, а снизу появится плавающий Dock с кистями. Заполняйте график моментально и сохраняйте изменения галочкой (или отменяйте крестиком)!</li>
+                <li>🎨 <strong>Пастельная гамма & Тёмная тема:</strong> Встроенная тёмная тема (переключатель ☀️/🌙 в шапке). Эффекты матового стекла (Glassmorphism) создают ощущение лёгкости.</li>
+                <li>✨ <strong>Кристальный дизайн:</strong> Мы убрали весь визуальный шум. Дашборд стал минималистичным.</li>
+                <li>🇵🇱 <strong>Польские отпуска (Kodeks Pracy):</strong> Точный расчет ЗП для: <em>Urlop wypoczynkowy, Na żądanie, Okolicznościowy, Siła wyższa (50%), L4 и Bezpłatny.</em></li>
             </ul>
-            <button class="btn btn-primary" style="width: 100%; justify-content:center;" onclick="closeModal('changelogModal')">Отлично!</button>
+            <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="closeModal('changelogModal')">Понятно, погнали!</button>
         </div>
     </div>
 
+    <!-- Выбор месяца -->
+    <div class="modal-overlay" id="monthPickerModal">
+        <div class="modal">
+            <h3>📅 Быстрый переход</h3>
+            <div class="form-group">
+                <input type="month" id="monthPickerInput">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('monthPickerModal')">Отмена</button>
+                <button class="btn btn-primary" onclick="goToSelectedMonth()">Перейти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Обновленное модальное окно Дня -->
     <div class="modal-overlay" id="shiftModal">
         <div class="modal">
             <h3>📝 День <span id="modalDate" style="color:var(--text-light); font-size:0.9rem;"></span></h3>
-            <div class="form-group">
-                <div class="radio-options">
-                    <label class="radio-option"><input type="radio" name="dayType" value="weekend"> Выходной (надчасы x2)</label>
-                    <label class="radio-option"><input type="radio" name="dayType" value="1"> 1 shift</label>
-                    <label class="radio-option"><input type="radio" name="dayType" value="2"> 2 shift</label>
+            
+            <div class="segmented-control">
+                <input type="radio" id="dayTypeWeekend" name="dayType" value="weekend">
+                <label for="dayTypeWeekend">Выходной</label>
+                <input type="radio" id="dayType1" name="dayType" value="1" checked>
+                <label for="dayType1">1 shift</label>
+                <input type="radio" id="dayType2" name="dayType" value="2">
+                <label for="dayType2">2 shift</label>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+                <div class="form-group" style="flex:1;">
+                    <label>надчасы ×1.5</label>
+                    <input type="number" id="otDay" step="0.5" placeholder="0">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>надчасы ×2</label>
+                    <input type="number" id="otNight" step="0.5" placeholder="0">
                 </div>
             </div>
-            <div class="form-group"><label>Надчасы День (x1.5):</label><input type="number" id="otDay" step="0.5"></div>
-            <div class="form-group"><label>Надчасы Ночь (x2):</label><input type="number" id="otNight" step="0.5"></div>
+
             <div class="modal-actions">
-                <button class="btn btn-danger" onclick="clearDay()">Очистить</button>
                 <button class="btn btn-primary" onclick="saveShift()">Сохранить</button>
             </div>
-            <button class="btn" style="margin-top:10px; width:100%; justify-content:center;" onclick="closeModal('shiftModal')">Закрыть</button>
+            <button class="btn" style="margin-top:10px; width:100%;" onclick="closeModal('shiftModal')">Закрыть</button>
         </div>
     </div>
 
-    <div class="modal-overlay" id="vacationModal">
+    <!-- Модальное окно отсутствия -->
+    <div class="modal-overlay" id="absenceModal">
         <div class="modal">
-            <h3>🏖️ Добавить отпуск</h3>
+            <h3>🏖️ Добавить отсутствие</h3>
+            
+            <div class="form-group">
+                <label>Тип отсутствия:</label>
+                <select id="absenceType">
+                    <optgroup label="Оплачиваемые (100% от суммы отпуска)">
+                        <option value="wypoczynkowy">🏖️ Urlop wypoczynkowy (Отпуск)</option>
+                        <option value="zadanie">⚠️ Urlop na żądanie</option>
+                        <option value="okolicznosciowy">🎉 Urlop okolicznościowy</option>
+                    </optgroup>
+                    <optgroup label="Зависят от ставки (Почасовая)">
+                        <option value="l4">💊 Zwolnienie lekarskie (L4)</option>
+                        <option value="sila">🚨 Siła wyższa (Форс-мажор)</option>
+                    </optgroup>
+                    <optgroup label="Неоплачиваемые">
+                        <option value="bezplatny">⏸️ Urlop bezpłatny (0%)</option>
+                    </optgroup>
+                </select>
+            </div>
+
             <div class="form-group"><label>С:</label><input type="date" id="vacationStart"></div>
             <div class="form-group"><label>По:</label><input type="date" id="vacationEnd"></div>
+            
             <div class="modal-actions">
-                <button class="btn" style="justify-content:center;" onclick="closeModal('vacationModal')">Отмена</button>
-                <button class="btn btn-primary" style="justify-content:center;" onclick="saveVacation()">Сохранить</button>
+                <button class="btn" onclick="closeModal('absenceModal')">Отмена</button>
+                <button class="btn btn-primary" onclick="saveAbsence()">Сохранить</button>
             </div>
         </div>
     </div>
@@ -347,40 +467,59 @@
             <h3>🗓️ Заполнить период</h3>
             <div class="form-group"><label>С:</label><input type="date" id="bulkStart"></div>
             <div class="form-group"><label>По:</label><input type="date" id="bulkEnd"></div>
-            <div class="form-group">
-                <div class="radio-options">
-                    <label class="radio-option"><input type="radio" name="bulkType" value="1" checked> 1 shift</label>
-                    <label class="radio-option"><input type="radio" name="bulkType" value="2"> 2 shift</label>
-                </div>
+            
+            <div class="segmented-control" style="margin-top: 10px;">
+                <input type="radio" id="bulkType1" name="bulkType" value="1" checked>
+                <label for="bulkType1">1 shift</label>
+                <input type="radio" id="bulkType2" name="bulkType" value="2">
+                <label for="bulkType2">2 shift</label>
             </div>
+
             <div class="modal-actions">
-                <button class="btn" style="justify-content:center;" onclick="closeModal('bulkModal')">Отмена</button>
-                <button class="btn btn-primary" style="justify-content:center;" onclick="saveBulk()">Заполнить</button>
+                <button class="btn" onclick="closeModal('bulkModal')">Отмена</button>
+                <button class="btn btn-primary" onclick="saveBulk()">Заполнить</button>
             </div>
         </div>
     </div>
 
     <div class="modal-overlay" id="vacationListModal">
         <div class="modal">
-            <h3>🏖️ История отпусков</h3>
-            <div id="vacationListSummary" style="background: var(--vacation); padding: 12px; border-radius: 12px; margin-bottom: 16px; font-size: 0.9rem;"></div>
+            <h3>🏖️ История отсутствий</h3>
+            <div id="vacationListSummary" style="background: var(--vacation-bg); color: var(--vacation-text); padding: 12px; border-radius: 12px; margin-bottom: 16px; font-size: 0.9rem;"></div>
             <div id="vacationListContainer" style="overflow-y: auto; flex: 1; padding-right: 4px; margin-bottom: 16px; min-height: 150px;"></div>
-            <button class="btn" style="width: 100%; justify-content:center;" onclick="closeModal('vacationListModal')">Закрыть</button>
+            <button class="btn" style="width: 100%;" onclick="closeModal('vacationListModal')">Закрыть</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="salaryModal">
         <div class="modal">
-            <h3>💰 Расчет зарплаты за месяц</h3>
+            <h3>💰 Расчет зарплаты</h3>
             <div id="salaryBreakdownContent" style="display:flex; flex-direction:column; gap:10px; font-size:0.9rem;"></div>
-            <button class="btn" style="width: 100%; margin-top:20px; justify-content:center;" onclick="closeModal('salaryModal')">Закрыть</button>
+            <button class="btn" style="width: 100%; margin-top:20px;" onclick="closeModal('salaryModal')">Закрыть</button>
         </div>
     </div>
 
-    <!-- Уведомления -->
     <div class="toast" id="toast"></div>
 
 <script>
+// ==================== ТЕМА ====================
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+}
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+}
+function updateThemeIcon(theme) {
+    document.getElementById('themeToggleBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
+}
+initTheme();
+
 // ==================== НАСТРОЙКА FIREBASE ====================
 const firebaseConfig = {
   apiKey: "AIzaSyAXAk_c5I9ZwHV36_OIHe7L8bvz0k3ghAU",
@@ -399,14 +538,18 @@ let currentUser = null;
 // ==================== ИНИЦИАЛИЗАЦИЯ ДАННЫХ ====================
 let currentDate = new Date(); 
 let selectedDate = null;
-let quickTool = 'off';
+
+// Переменные для Focus Mode (Режим в 1 клик)
+let isEditMode = false;
+let currentEditTool = '1';
+let backupDataString = "";
 
 let data = { 
     shifts: {}, 
     vacations: {}, 
     vacationTotal: 28, 
     financesByMonth: { 
-        "default": { rate: 41, vacation: 0, bonus: 0, taxMultiplier: 0.7025 } 
+        "default": { rate: 41, vacation: 0, bonus: 0, taxMultiplier: 0.7025, l4Multiplier: 0.8, silaMultiplier: 0.5 } 
     } 
 };
 
@@ -419,7 +562,6 @@ auth.onAuthStateChanged(async (user) => {
     if (user) {
         currentUser = user;
         loginOverlay.classList.remove('active');
-        
         try {
             const docRef = db.collection("users").doc(user.uid);
             const docSnap = await docRef.get();
@@ -427,12 +569,9 @@ auth.onAuthStateChanged(async (user) => {
                 data = docSnap.data();
                 if (!data.shifts) data.shifts = {};
                 if (!data.vacations) data.vacations = {};
-                if (!data.financesByMonth) data.financesByMonth = { "default": { rate: 41, vacation: 0, bonus: 0, taxMultiplier: 0.7025 } };
+                if (!data.financesByMonth) data.financesByMonth = { "default": { rate: 41, vacation: 0, bonus: 0, taxMultiplier: 0.7025, l4Multiplier: 0.8, silaMultiplier: 0.5 } };
             }
-        } catch (error) {
-            console.error("Ошибка загрузки данных:", error);
-            showToast("Ошибка соединения с базой!");
-        }
+        } catch (error) { console.error("Ошибка:", error); showToast("Ошибка БД!"); }
         init();
     } else {
         currentUser = null;
@@ -444,13 +583,7 @@ function loginUser() {
     const email = document.getElementById('loginEmail').value;
     const pass = document.getElementById('loginPassword').value;
     const errBox = document.getElementById('loginError');
-    
-    auth.signInWithEmailAndPassword(email, pass)
-        .then(() => { errBox.style.display = 'none'; })
-        .catch(err => {
-            errBox.textContent = "Ошибка: Неверный email или пароль.";
-            errBox.style.display = 'block';
-        });
+    auth.signInWithEmailAndPassword(email, pass).then(() => { errBox.style.display = 'none'; }).catch(err => { errBox.textContent = "Ошибка входа. Проверьте данные."; errBox.style.display = 'block'; });
 }
 
 function logoutUser() { auth.signOut().then(() => window.location.reload()); }
@@ -459,8 +592,7 @@ function logoutUser() { auth.signOut().then(() => window.location.reload()); }
 function saveData() { 
     if (currentUser) {
         const dataToSave = { ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-        db.collection("users").doc(currentUser.uid).set(dataToSave)
-          .catch(error => { console.error("Ошибка:", error); showToast("Ошибка сохранения!"); });
+        db.collection("users").doc(currentUser.uid).set(dataToSave).catch(error => { console.error("Ошибка:", error); });
     }
 }
 
@@ -469,16 +601,34 @@ function init() {
     renderCalendar(); updateStats(); updateSettingsUI(); 
 }
 
-// Обновленная функция навигации без кнопок-табов
 function switchTab(tabId) {
+    if(isEditMode) exitFocusMode(false);
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tabId).classList.add('active'); 
-    window.scrollTo(0, 0); // Возвращаемся наверх при смене экранов
+    window.scrollTo(0, 0);
 }
 
 function changeMonth(delta) { 
+    if(isEditMode) return;
     currentDate.setMonth(currentDate.getMonth() + delta); 
     renderCalendar(); updateStats(); updateSettingsUI(); 
+}
+
+function openMonthPicker() {
+    if(isEditMode) return;
+    document.getElementById('monthPickerInput').value = `${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}`;
+    openModal('monthPickerModal');
+}
+
+function goToSelectedMonth() {
+    const val = document.getElementById('monthPickerInput').value;
+    if(val) {
+        const [y, m] = val.split('-');
+        currentDate.setFullYear(parseInt(y));
+        currentDate.setMonth(parseInt(m) - 1);
+        renderCalendar(); updateStats(); updateSettingsUI();
+        closeModal('monthPickerModal');
+    }
 }
 
 function getCurrentMonthKey() { return `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`; }
@@ -486,10 +636,10 @@ function getCurrentMonthKey() { return `${currentDate.getFullYear()}-${String(cu
 function getFinancesForCurrentMonth() {
     const key = getCurrentMonthKey();
     if (!data.financesByMonth[key]) {
-        let def = data.financesByMonth["default"] || { rate: 41, vacation: 0, bonus: 0, taxMultiplier: 0.7025 };
+        let def = data.financesByMonth["default"] || { rate: 41, vacation: 0, bonus: 0, taxMultiplier: 0.7025, l4Multiplier: 0.8, silaMultiplier: 0.5 };
         let past = Object.keys(data.financesByMonth).filter(k => k !== 'default' && k < key).sort().reverse();
         if (past.length > 0) def = data.financesByMonth[past[0]];
-        data.financesByMonth[key] = { rate: def.rate, vacation: 0, bonus: 0, taxMultiplier: def.taxMultiplier }; 
+        data.financesByMonth[key] = { rate: def.rate, vacation: def.vacation, bonus: def.bonus, taxMultiplier: def.taxMultiplier, l4Multiplier: def.l4Multiplier ?? 0.8, silaMultiplier: def.silaMultiplier ?? 0.5 }; 
         saveData();
     }
     return data.financesByMonth[key];
@@ -502,6 +652,8 @@ function updateSettingsUI() {
     document.getElementById('vacationPay').value = f.vacation;
     document.getElementById('bonusPay').value = f.bonus; 
     document.getElementById('taxMultiplier').value = f.taxMultiplier;
+    document.getElementById('l4Multiplier').value = f.l4Multiplier ?? 0.8;
+    document.getElementById('silaMultiplier').value = f.silaMultiplier ?? 0.5;
 }
 
 function saveFinances() {
@@ -509,9 +661,11 @@ function saveFinances() {
         rate: parseFloat(document.getElementById('hourlyRate').value) || 0, 
         vacation: parseFloat(document.getElementById('vacationPay').value) || 0,
         bonus: parseFloat(document.getElementById('bonusPay').value) || 0, 
-        taxMultiplier: parseFloat(document.getElementById('taxMultiplier').value) || 0.7025
+        taxMultiplier: parseFloat(document.getElementById('taxMultiplier').value) || 0.7025,
+        l4Multiplier: parseFloat(document.getElementById('l4Multiplier').value) || 0.8,
+        silaMultiplier: parseFloat(document.getElementById('silaMultiplier').value) || 0.5
     }; 
-    saveData(); updateStats(); showToast('Сохранено на этот месяц!');
+    saveData(); updateStats(); showToast('Настройки финансов сохранены!');
 }
 
 function saveVacationTotal() { 
@@ -519,29 +673,90 @@ function saveVacationTotal() {
     saveData(); updateStats(); showToast('Лимит отпусков сохранен!'); 
 }
 
-function selectQuickTool(btnEl, toolValue) {
-    document.querySelectorAll('.quick-tool-btn').forEach(b => b.classList.remove('active'));
+function toggleSmartDropdown(event) {
+    if(isEditMode) return;
+    event.stopPropagation();
+    document.getElementById('smartDropdown').classList.toggle('active');
+}
+function closeSmartDropdown() { document.getElementById('smartDropdown').classList.remove('active'); }
+window.addEventListener('click', closeSmartDropdown);
+
+/* ==================== ФОКУС РЕЖИМ В 1 КЛИК ==================== */
+function enterFocusMode() {
+    isEditMode = true;
+    backupDataString = JSON.stringify(data);
+    document.body.classList.add('focus-mode');
+    document.getElementById('editDock').classList.add('active');
+    
+    // Сброс на дефолтный инструмент при входе
+    document.querySelectorAll('.edit-tool-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.edit-tool-btn[data-tool="1"]').classList.add('active');
+    currentEditTool = '1';
+    
+    showToast('Режим редактирования активирован');
+}
+
+function exitFocusMode(saveChanges) {
+    isEditMode = false;
+    document.body.classList.remove('focus-mode');
+    document.getElementById('editDock').classList.remove('active');
+    
+    if (saveChanges) {
+        saveData();
+        showToast('Изменения сохранены!');
+    } else {
+        data = JSON.parse(backupDataString);
+        renderCalendar();
+        updateStats();
+        showToast('Изменения отменены');
+    }
+}
+
+function setEditTool(btnEl, toolValue) {
+    document.querySelectorAll('.edit-tool-btn').forEach(b => b.classList.remove('active'));
     btnEl.classList.add('active');
-    quickTool = toolValue;
-    if (toolValue !== 'off') showToast('Режим 1 клика активирован!');
+    currentEditTool = toolValue;
 }
 
 function handleDayClick(dateKey) {
-    if (quickTool === 'off') { openShiftModal(dateKey); return; }
+    if (!isEditMode) { 
+        openShiftModal(dateKey); 
+        return; 
+    }
     
-    if (quickTool === 'clear') {
-        delete data.shifts[dateKey]; delete data.vacations[dateKey];
-    } else if (quickTool === '1' || quickTool === '2' || quickTool === 'weekend') {
+    // Логика режима редактирования
+    if (currentEditTool === 'clear') {
+        delete data.shifts[dateKey]; 
+        delete data.vacations[dateKey];
+    } else if (currentEditTool === '1' || currentEditTool === '2' || currentEditTool === 'weekend') {
         data.shifts[dateKey] = {
-            type: quickTool,
+            type: currentEditTool,
             otDay: (data.shifts[dateKey] && data.shifts[dateKey].otDay) || 0,
             otNight: (data.shifts[dateKey] && data.shifts[dateKey].otNight) || 0
         };
         delete data.vacations[dateKey];
     }
-    saveData(); renderCalendar(); updateStats();
+    
+    renderCalendar(); 
+    updateStats();
+    // saveData() не вызывается на каждый клик, ждем выхода из Focus Mode
 }
 
+function deleteCellData(event, dateKey) {
+    event.stopPropagation();
+    if (data.shifts[dateKey]) delete data.shifts[dateKey];
+    if (data.vacations[dateKey]) delete data.vacations[dateKey];
+    
+    renderCalendar(); 
+    updateStats();
+    
+    if(!isEditMode) {
+        saveData(); 
+        showToast('Удалено!');
+    }
+}
+
+// ==================== РЕНДЕР КАЛЕНДАРЯ И ЗП ====================
 function renderCalendar() {
     const y = currentDate.getFullYear(), m = currentDate.getMonth();
     document.getElementById('monthTitle').textContent = `${MONTHS[m]} ${y}`;
@@ -557,29 +772,44 @@ function renderCalendar() {
         const dateKey = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const cell = document.createElement('div'); cell.className = 'day-cell';
         
-        const shift = data.shifts[dateKey]; const isVac = data.vacations[dateKey];
-        let hasOt = false, otDay = 0, otNight = 0;
+        const shift = data.shifts[dateKey]; const vacValue = data.vacations[dateKey];
+        const isVac = !!vacValue;
+        const vType = vacValue === true ? 'wypoczynkowy' : vacValue; 
         
+        let hasOt = false, otDay = 0, otNight = 0;
         if (shift) { otDay = parseFloat(shift.otDay) || 0; otNight = parseFloat(shift.otNight) || 0; hasOt = (otDay > 0 || otNight > 0); }
-        if (isVac) cell.classList.add('vacation');
-        if (shift) { 
-            if (shift.type === 'weekend') cell.classList.add('weekend'); 
-            else if (shift.type === '1' || shift.type === '2') cell.classList.add('has-shift-' + shift.type); 
-            if (hasOt) cell.classList.add('has-overtime'); 
-        }
+        
+        if (shift && shift.type === 'weekend') cell.classList.add('weekend');
         if (y === today.getFullYear() && m === today.getMonth() && day === today.getDate()) cell.classList.add('today');
         
         let html = `<div class="day-number">${day}</div><div class="day-content">`; let totalHours = 0;
-        if (isVac) { html += `<span class="badge" style="background:var(--accent)">Отпуск</span>`; totalHours = 8; } 
+        
+        if (isVac) { 
+            let badgeBg = 'var(--vacation-bg)'; let badgeColor = 'var(--vacation-text)'; let badgeText = 'Отпуск';
+            if(vType === 'zadanie') { badgeText = 'Na żądanie'; }
+            else if(vType === 'okolicznosciowy') { badgeBg = 'var(--okolicznosciowy-bg)'; badgeColor = 'var(--okolicznosciowy-text)'; badgeText = 'Okolicznościowy'; }
+            else if(vType === 'sila') { badgeBg = 'var(--sila-bg)'; badgeColor = 'var(--sila-text)'; badgeText = 'Siła wyższa'; }
+            else if(vType === 'l4') { badgeBg = 'var(--l4-bg)'; badgeColor = 'var(--l4-text)'; badgeText = 'L4'; }
+            else if(vType === 'bezplatny') { badgeBg = 'var(--bezplatny-bg)'; badgeColor = 'var(--bezplatny-text)'; badgeText = 'Без оплаты'; }
+            
+            html += `<span class="badge" style="background:${badgeBg}; color:${badgeColor};">${badgeText}</span>`; 
+            if(vType !== 'bezplatny') totalHours = 8; 
+        } 
         else if (shift) {
-            if (shift.type === '1' || shift.type === '2') { html += `<span class="badge" style="background:var(--shift-${shift.type})">${shift.type} shift</span>`; totalHours += 8; }
+            if (shift.type === '1' || shift.type === '2') { 
+                html += `<span class="badge" style="background:var(--shift-${shift.type}-bg); color:var(--shift-${shift.type}-text);">${shift.type} shift</span>`; 
+                totalHours += 8; 
+            }
             if (hasOt) {
                 let otCalc = (shift.type === 'weekend') ? ((otDay + otNight) * 2) : ((otDay * 1.5) + (otNight * 2));
-                html += `<span class="badge" style="background:var(--overtime)">+${otCalc}ч</span>`; totalHours += otCalc;
+                html += `<span class="badge" style="background:var(--overtime-bg); color:var(--overtime-text);">+${otCalc}ч</span>`; 
+                totalHours += otCalc;
             }
         }
         html += `</div>`;
         if (totalHours > 0) html += `<div class="day-hours">Всего: ${totalHours}ч</div>`; 
+        
+        if (isVac || shift) html += `<button class="delete-btn-inline" onclick="deleteCellData(event, '${dateKey}')">×</button>`;
         
         cell.innerHTML = html; cell.onclick = () => handleDayClick(dateKey); grid.appendChild(cell);
     }
@@ -587,9 +817,15 @@ function renderCalendar() {
 
 function updateStats() {
     const y = currentDate.getFullYear(), m = currentDate.getMonth();
-    let reg=0, ot=0, sh=0, vacMonth=0, vacTotalUsed=0;
+    let reg=0, ot=0, sh=0, vacTotalUsed=0;
     
-    Object.keys(data.vacations).forEach(k => { if(data.vacations[k]) vacTotalUsed++; });
+    Object.keys(data.vacations).forEach(k => { 
+        const v = data.vacations[k] === true ? 'wypoczynkowy' : data.vacations[k];
+        if(v === 'wypoczynkowy' || v === 'zadanie') vacTotalUsed++;
+    });
+    
+    const f = getFinancesForCurrentMonth();
+    let totalGrossAbsences = 0;
     
     for (let day = 1; day <= new Date(y, m + 1, 0).getDate(); day++) {
         const k = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
@@ -599,11 +835,21 @@ function updateStats() {
             let otDay = parseFloat(s.otDay) || 0, otNight = parseFloat(s.otNight) || 0;
             if (s.type === 'weekend') ot += (otDay + otNight) * 2; else ot += (otDay * 1.5) + (otNight * 2);
         }
-        if (data.vacations[k]) vacMonth++;
+        if (data.vacations[k]) {
+            const v = data.vacations[k] === true ? 'wypoczynkowy' : data.vacations[k];
+            if(v === 'wypoczynkowy' || v === 'zadanie' || v === 'okolicznosciowy') {
+                totalGrossAbsences += f.vacation;
+            }
+            else if(v === 'sila') {
+                totalGrossAbsences += (8 * f.rate * (f.silaMultiplier ?? 0.5));
+            }
+            else if(v === 'l4') {
+                totalGrossAbsences += (8 * f.rate * (f.l4Multiplier ?? 0.8));
+            }
+        }
     }
     
-    const f = getFinancesForCurrentMonth();
-    const finalSalary = (((reg + ot) * f.rate) + (vacMonth * f.vacation) + f.bonus) * f.taxMultiplier;
+    const finalSalary = (((reg + ot) * f.rate) + totalGrossAbsences + f.bonus) * f.taxMultiplier;
     
     document.getElementById('statSalary').textContent = finalSalary.toFixed(2) + ' zł';
     document.getElementById('statWorkHours').textContent = reg; 
@@ -612,14 +858,13 @@ function updateStats() {
     const totalV = Number(data.vacationTotal) || 28;
     const remain = Math.max(0, totalV - vacTotalUsed);
     document.getElementById('statVacationGlobal').textContent = `${remain} / ${totalV}`;
-    document.getElementById('statVacationMonth').textContent = `В этом месяце: ${vacMonth}`;
 }
 
 function openShiftModal(dateKey) { 
     selectedDate = dateKey; const s = data.shifts[dateKey] || {}; 
     document.getElementById('modalDate').textContent = dateKey.split('-').reverse().join('.'); 
-    const r = document.querySelector(`input[name="dayType"][value="${s.type || 'weekend'}"]`); 
-    if (r) r.checked = true; 
+    const type = s.type || '1';
+    document.querySelector(`input[name="dayType"][value="${type}"]`).checked = true;
     document.getElementById('otDay').value = s.otDay || ''; 
     document.getElementById('otNight').value = s.otNight || ''; 
     openModal('shiftModal'); 
@@ -634,12 +879,6 @@ function saveShift() {
     }; 
     delete data.vacations[selectedDate]; 
     saveData(); renderCalendar(); updateStats(); closeModal('shiftModal'); showToast('Сохранено!'); 
-}
-
-function clearDay() { 
-    if (!selectedDate) return; 
-    delete data.shifts[selectedDate]; delete data.vacations[selectedDate]; 
-    saveData(); renderCalendar(); updateStats(); closeModal('shiftModal'); showToast('День очищен!'); 
 }
 
 function openBulkModal() { 
@@ -661,26 +900,68 @@ function saveBulk() {
     saveData(); renderCalendar(); updateStats(); closeModal('bulkModal'); showToast('График заполнен!'); 
 }
 
+function openAbsenceModal() { 
+    document.getElementById('vacationStart').value = ''; document.getElementById('vacationEnd').value = '';
+    openModal('absenceModal'); 
+}
+
+function saveAbsence() { 
+    const s = document.getElementById('vacationStart').value, e = document.getElementById('vacationEnd').value; 
+    const vType = document.getElementById('absenceType').value;
+    if (!s || !e) return; 
+    for (let d = new Date(s); d <= new Date(e); d.setDate(d.getDate() + 1)) { 
+        const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
+        data.vacations[k] = vType; delete data.shifts[k]; 
+    } 
+    saveData(); renderCalendar(); updateStats(); closeModal('absenceModal'); showToast('Отсутствие добавлено!'); 
+}
+
+function deleteVacationDate(dateKey) {
+    if (data.vacations[dateKey]) {
+        delete data.vacations[dateKey];
+        saveData(); renderCalendar(); updateStats(); openVacationListModal(); showToast('Удалено!');
+    }
+}
+
 function openVacationListModal() {
     const container = document.getElementById('vacationListContainer'), summary = document.getElementById('vacationListSummary');
-    let vacTotalUsed = 0; Object.keys(data.vacations).forEach(k => { if(data.vacations[k]) vacTotalUsed++; });
+    let vacTotalUsed = 0, zadanie = 0, sila = 0, l4 = 0, okolicznosciowy = 0;
+    
+    Object.keys(data.vacations).forEach(k => { 
+        const v = data.vacations[k] === true ? 'wypoczynkowy' : data.vacations[k];
+        if(v === 'wypoczynkowy') vacTotalUsed++;
+        if(v === 'zadanie') { vacTotalUsed++; zadanie++; }
+        if(v === 'okolicznosciowy') okolicznosciowy++;
+        if(v === 'sila') sila++;
+        if(v === 'l4') l4++;
+    });
     const totalV = Number(data.vacationTotal) || 28, remain = Math.max(0, totalV - vacTotalUsed);
     
-    summary.innerHTML = `<strong>Всего положено:</strong> ${totalV} дн.<br><strong>Использовано:</strong> ${vacTotalUsed} дн.<br><strong>Осталось:</strong> ${remain} дн.`;
-    const dates = Object.keys(data.vacations).filter(d => data.vacations[d]).sort();
+    summary.innerHTML = `<strong>Пул отпусков:</strong> ${vacTotalUsed} из ${totalV} дн. (Остаток: ${remain})<br>
+                         <span style="font-size:0.8rem; opacity:0.8;">Из них Na żądanie: ${zadanie} дн.<br>
+                         Siła wyższa: ${sila} дн. | L4: ${l4} дн. | Около: ${okolicznosciowy} дн.</span>`;
+                         
+    const dates = Object.keys(data.vacations).filter(d => data.vacations[d]).sort().reverse();
     
     if (!dates.length) { 
-        container.innerHTML = '<p style="color:var(--text-light); text-align:center; padding: 20px 0;">Отпусков пока нет.</p>'; 
+        container.innerHTML = '<p style="color:var(--text-light); text-align:center; padding: 20px 0;">Записей нет.</p>'; 
     } else {
         let curM = '', html = '';
         dates.forEach(ds => {
             const d = new Date(ds), my = `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
             if (my !== curM) { 
                 if(curM) html += `</div></div>`; 
-                html += `<div class="vacation-month-group"><div class="vacation-month-title">${my}</div><div class="vacation-days-container">`; 
+                html += `<div class="vacation-month-group"><div style="font-size: 0.9rem; color: var(--accent); margin-bottom: 8px; font-weight: 700;">${my}</div><div style="display: flex; flex-wrap: wrap; gap: 8px;">`; 
                 curM = my; 
             }
-            html += `<span class="vacation-day-badge" style="display:inline-flex; align-items:center; gap:6px;">
+            const vType = data.vacations[ds] === true ? 'wypoczynkowy' : data.vacations[ds];
+            let badgeBg = 'var(--vacation-bg)', badgeColor = 'var(--vacation-text)';
+            if(vType === 'okolicznosciowy') { badgeBg = 'var(--okolicznosciowy-bg)'; badgeColor = 'var(--okolicznosciowy-text)'; }
+            if(vType === 'sila') { badgeBg = 'var(--sila-bg)'; badgeColor = 'var(--sila-text)'; }
+            if(vType === 'l4') { badgeBg = 'var(--l4-bg)'; badgeColor = 'var(--l4-text)'; }
+            if(vType === 'bezplatny') { badgeBg = 'var(--bezplatny-bg)'; badgeColor = 'var(--bezplatny-text)'; }
+            
+            html += `<span style="background:${badgeBg}; color:${badgeColor}; padding: 5px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; display:inline-flex; align-items:center; gap:6px;">
                         ${d.getDate()} число 
                         <strong onclick="deleteVacationDate('${ds}')" style="cursor:pointer; color:#ff3b30; margin-left:2px;">&times;</strong>
                      </span>`;
@@ -690,26 +971,10 @@ function openVacationListModal() {
     openModal('vacationListModal');
 }
 
-function saveVacation() { 
-    const s = document.getElementById('vacationStart').value, e = document.getElementById('vacationEnd').value; 
-    if (!s || !e) return; 
-    for (let d = new Date(s); d <= new Date(e); d.setDate(d.getDate() + 1)) { 
-        const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
-        data.vacations[k] = true; delete data.shifts[k]; 
-    } 
-    saveData(); renderCalendar(); updateStats(); closeModal('vacationModal'); showToast('Отпуск добавлен!'); 
-}
-
-function deleteVacationDate(dateKey) {
-    if (data.vacations[dateKey]) {
-        delete data.vacations[dateKey];
-        saveData(); renderCalendar(); updateStats(); openVacationListModal(); showToast('Отпуск отменен!');
-    }
-}
-
 function openSalaryModal() {
     const y = currentDate.getFullYear(), m = currentDate.getMonth();
-    let regHours = 0, otHours = 0, vacMonth = 0;
+    let regHours = 0, otHours = 0;
+    let vWypocZadOkol = 0, vSila = 0, vL4 = 0;
     
     for (let day = 1; day <= new Date(y, m + 1, 0).getDate(); day++) {
         const k = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
@@ -719,26 +984,35 @@ function openSalaryModal() {
             let otDay = parseFloat(s.otDay) || 0, otNight = parseFloat(s.otNight) || 0;
             if (s.type === 'weekend') otHours += (otDay + otNight) * 2; else otHours += (otDay * 1.5) + (otNight * 2);
         }
-        if (data.vacations[k]) vacMonth++;
+        if (data.vacations[k]) {
+            const v = data.vacations[k] === true ? 'wypoczynkowy' : data.vacations[k];
+            if (v === 'wypoczynkowy' || v === 'zadanie' || v === 'okolicznosciowy') vWypocZadOkol++;
+            if (v === 'sila') vSila++;
+            if (v === 'l4') vL4++;
+        }
     }
 
     const f = getFinancesForCurrentMonth();
     const regPay = regHours * f.rate;
     const otPay = otHours * f.rate;
-    const vacPayTotal = vacMonth * f.vacation;
-    const grossTotal = regPay + otPay + vacPayTotal + f.bonus;
+    
+    const payWypocZadOkol = vWypocZadOkol * f.vacation;
+    const paySila = vSila * 8 * f.rate * (f.silaMultiplier ?? 0.5);
+    const payL4 = vL4 * 8 * f.rate * (f.l4Multiplier ?? 0.8);
+    
+    const grossTotal = regPay + otPay + payWypocZadOkol + paySila + payL4 + f.bonus;
     const netTotal = grossTotal * f.taxMultiplier;
 
     const html = `
         <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); padding-bottom:6px;">
-            <span>Отработано (${regHours}ч × ${f.rate} zł):</span> <strong>${regPay.toFixed(2)} zł</strong>
+            <span>Отработано (${regHours}ч):</span> <strong>${regPay.toFixed(2)} zł</strong>
         </div>
         <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); padding-bottom:6px;">
-            <span>Переработки (${otHours}ч × ${f.rate} zł):</span> <strong>${otPay.toFixed(2)} zł</strong>
+            <span>Переработки (${otHours}ч):</span> <strong>${otPay.toFixed(2)} zł</strong>
         </div>
-        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); padding-bottom:6px;">
-            <span>Отпускные (${vacMonth}дн × ${f.vacation} zł):</span> <strong>${vacPayTotal.toFixed(2)} zł</strong>
-        </div>
+        ${vWypocZadOkol > 0 ? `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); padding-bottom:6px;"><span>Отпуск 100% (${vWypocZadOkol}дн):</span> <strong>${payWypocZadOkol.toFixed(2)} zł</strong></div>` : ''}
+        ${vSila > 0 ? `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); padding-bottom:6px;"><span>Siła wyższa (${vSila}дн × ${(f.silaMultiplier ?? 0.5)*100}\% от ставки):</span> <strong>${paySila.toFixed(2)} zł</strong></div>` : ''}
+        ${vL4 > 0 ? `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); padding-bottom:6px;"><span>Больничный L4 (${vL4}дн × ${(f.l4Multiplier ?? 0.8)*100}\% от ставки):</span> <strong>${payL4.toFixed(2)} zł</strong></div>` : ''}
         <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border); padding-bottom:6px;">
             <span>Премия (Брутто):</span> <strong>${f.bonus.toFixed(2)} zł</strong>
         </div>
@@ -756,10 +1030,7 @@ function openSalaryModal() {
 
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-function showToast(m) { 
-    const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); 
-    setTimeout(() => t.classList.remove('show'), 2500); 
-}
+function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
 </script>
 </body>
 </html>
