@@ -76,6 +76,80 @@
             --bezplatny-text: #98989d;
         }
 
+        /* === ПОЛЬЗОВАТЕЛЬСКИЕ ПАЛИТРЫ (СВЕТЛАЯ ТЕМА) === */
+        [data-palette="forest"] {
+            --bg: #DAF1DE;
+            --card: rgba(255, 255, 255, 0.65);
+            --text: #051F20;
+            --accent: #235347;
+            --accent-light: rgba(35, 83, 71, 0.15);
+        }
+        [data-palette="berry"] {
+            --bg: #FDEDE7;
+            --card: rgba(255, 255, 255, 0.65);
+            --text: #4B1D27;
+            --accent: #9A4454;
+            --accent-light: rgba(154, 68, 84, 0.15);
+        }
+        [data-palette="terracotta"] {
+            --bg: #F2ECE9;
+            --card: rgba(255, 255, 255, 0.65);
+            --text: #3D261D;
+            --accent: #C0754D;
+            --accent-light: rgba(192, 117, 77, 0.15);
+        }
+        [data-palette="twilight"] {
+            --bg: #F0E6EC;
+            --card: rgba(255, 255, 255, 0.65);
+            --text: #26425A;
+            --accent: #86A8CF;
+            --accent-light: rgba(134, 168, 207, 0.2);
+        }
+        [data-palette="ocean"] {
+            --bg: #E3F2FD;
+            --card: rgba(255, 255, 255, 0.65);
+            --text: #021024;
+            --accent: #5483B3;
+            --accent-light: rgba(84, 131, 179, 0.15);
+        }
+
+        /* === ПОЛЬЗОВАТЕЛЬСКИЕ ПАЛИТРЫ (ТЁМНАЯ ТЕМА) === */
+        [data-theme="dark"][data-palette="forest"] {
+            --bg: #051F20;
+            --card: rgba(11, 43, 38, 0.65);
+            --text: #DAF1DE;
+            --accent: #8EB69B;
+            --accent-light: rgba(142, 182, 155, 0.2);
+        }
+        [data-theme="dark"][data-palette="berry"] {
+            --bg: #2D1117;
+            --card: rgba(75, 29, 39, 0.65);
+            --text: #FDEDE7;
+            --accent: #E09A8A;
+            --accent-light: rgba(224, 154, 138, 0.15);
+        }
+        [data-theme="dark"][data-palette="terracotta"] {
+            --bg: #1A100C;
+            --card: rgba(46, 29, 21, 0.65);
+            --text: #F2ECE9;
+            --accent: #D59D80;
+            --accent-light: rgba(213, 157, 128, 0.15);
+        }
+        [data-theme="dark"][data-palette="twilight"] {
+            --bg: #131C26;
+            --card: rgba(38, 66, 90, 0.5);
+            --text: #E1CBD7;
+            --accent: #C38EB4;
+            --accent-light: rgba(195, 142, 180, 0.2);
+        }
+        [data-theme="dark"][data-palette="ocean"] {
+            --bg: #010812;
+            --card: rgba(5, 38, 89, 0.5);
+            --text: #C1E8FF;
+            --accent: #7DA0CA;
+            --accent-light: rgba(125, 160, 202, 0.2);
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif; 
@@ -95,7 +169,7 @@
         .app-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; transition: all 0.4s ease; }
         .app-header { font-weight: 700; font-size: 2.2rem; display: flex; align-items: center; gap: 10px; letter-spacing: -0.03em; }
         .app-header span { color: var(--accent); }
-        .header-actions { display: flex; gap: 8px; align-items: center; }
+        .header-actions { display: flex; gap: 8px; align-items: center; position: relative; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -121,7 +195,7 @@
         .btn:hover { background: var(--accent-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: var(--accent); border-color: var(--accent); }
         .btn:active { transform: translateY(0) scale(0.97); }
         .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
-        .btn-primary:hover { background: #0062cc; color: white; }
+        .btn-primary:hover { background: var(--accent); opacity: 0.9; color: white; }
         .btn-danger { color: #ff3b30; }
         
         .btn-icon-nav { width: 38px; height: 38px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; border: 1px solid var(--border); background: var(--card); cursor: pointer; color: var(--text); transition: 0.2s; box-shadow: var(--shadow); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
@@ -165,7 +239,7 @@
         .action-btn-save { background: rgba(52, 199, 89, 0.1); color: #34c759; }
         .action-btn-save:hover { background: #34c759; color: white; transform: scale(1.05); }
 
-        /* Календарь и Ячейки (с анимациями перелистывания) */
+        /* Календарь и Ячейки */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 28px; transition: none; }
         .slide-left { animation: slideLeftAnim 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
         .slide-right { animation: slideRightAnim 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
@@ -195,7 +269,7 @@
         .day-cell:hover .delete-btn-inline { opacity: 1; }
         .delete-btn-inline:hover { transform: scale(1.15); background: #ff3b30; }
 
-        /* Модальные окна и физика роста из ячейки */
+        /* Модальные окна */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .modal-overlay.active { display: flex; animation: fadeInModal 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
         @keyframes fadeInModal { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(12px); } }
@@ -227,7 +301,7 @@
         .segmented-control label { flex: 1; text-align: center; padding: 8px 4px; font-size: 0.85rem; font-weight: 600; color: var(--text); border-radius: 10px; cursor: pointer; transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .segmented-control input:checked + label { background: var(--card); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
 
-        /* iOS Style Settings Lists */
+        /* iOS Style Settings */
         .ios-list-header { font-size: 0.75rem; text-transform: uppercase; color: var(--text-light); font-weight: 600; margin-bottom: 6px; padding-left: 12px; margin-top: 24px; letter-spacing: 0.02em; }
         .ios-list { background: var(--card); backdrop-filter: var(--glass-blur); border-radius: 12px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border); }
         .ios-list-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
@@ -250,11 +324,7 @@
             .day-number { font-size: 0.75rem; } 
             body { padding: 16px 12px; padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)); } 
             .fab-update { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); right: 20px; padding: 10px 18px; font-size: 0.85rem; }
-            
-            /* Делаем крестик удаления видимым всегда на смартфонах */
             .delete-btn-inline { opacity: 0.75; width: 20px; height: 20px; font-size: 0.8rem; top: 4px; right: 4px; }
-            
-            /* Компактный вид бейджей */
             .badge { padding: 2px 5px; font-size: 0.6rem; letter-spacing: -0.02em; }
             .day-hours { font-size: 0.6rem; padding-top: 4px; }
             .hide-mobile { display: none; }
@@ -263,27 +333,49 @@
 </head>
 <body>
 
-    <!-- ЭКРАН ВХОДА -->
+    <!-- ЭКРАН ВХОДА (ИСПРАВЛЕННЫЙ) -->
     <div class="modal-overlay active" id="loginOverlay" style="z-index: 4000;">
-        <div class="modal">
+        <form class="modal" onsubmit="event.preventDefault(); loginUser();">
             <h3>🔐 Вход в систему</h3>
             <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 15px;">Введите email и пароль от аккаунта.</p>
+            
             <div class="error-msg" id="loginError" style="color:#ff3b30; margin-bottom: 10px; font-size: 0.85rem; display: none;"></div>
-            <input type="email" id="loginEmail" placeholder="Email" autocomplete="username" style="margin-bottom: 10px; width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
-            <input type="password" id="loginPassword" placeholder="Пароль" autocomplete="current-password" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
-            <button class="btn btn-primary" onclick="loginUser()" style="width: 100%; margin-top: 16px;">Войти</button>
-        </div>
+            
+            <input type="email" id="loginEmail" placeholder="Email" autocomplete="username" required
+                   style="margin-bottom: 10px; width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            
+            <input type="password" id="loginPassword" placeholder="Пароль" autocomplete="current-password" required
+                   style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">Войти</button>
+        </form>
     </div>
 
-    <!-- Заголовок -->
+    <!-- Заголовок и меню Оформления -->
     <div class="app-header-container">
         <div class="app-header">
             <div class="app-header-icon">📅</div>
             Shift<span>Calendar</span>
         </div>
         <div class="header-actions">
-            <button class="btn-icon-nav" onclick="toggleTheme()" title="Сменить тему" id="themeToggleBtn">☀️</button>
+            <!-- Кнопка вызова меню палитр и тем -->
+            <button class="btn-icon-nav" onclick="toggleThemeDropdown(event)" title="Оформление" id="themeMenuBtn">🎨</button>
             <button class="btn-icon-nav" onclick="switchTab('settings')" title="Настройки">⚙️</button>
+            
+            <!-- Выпадающее меню оформления -->
+            <div class="smart-dropdown" id="themeDropdown" style="right: 45px; top: calc(100% + 8px); width: 200px;">
+                <button class="dropdown-item" onclick="toggleTheme(); toggleThemeDropdown(event)">
+                    <span id="themeDropdownIcon">☀️</span> <span id="themeDropdownText">Тёмная тема</span>
+                </button>
+                <div class="dropdown-divider"></div>
+                <div style="padding: 4px 12px; font-size: 0.75rem; color: var(--text-light); text-transform: uppercase; font-weight: 600;">Палитра</div>
+                <button class="dropdown-item" onclick="setPalette('default')">🔵 Стандартная</button>
+                <button class="dropdown-item" onclick="setPalette('forest')">🌲 Хвоя</button>
+                <button class="dropdown-item" onclick="setPalette('berry')">🍒 Ягода</button>
+                <button class="dropdown-item" onclick="setPalette('terracotta')">🍁 Терракота</button>
+                <button class="dropdown-item" onclick="setPalette('twilight')">👾 Сумерки</button>
+                <button class="dropdown-item" onclick="setPalette('ocean')">🌊 Океан</button>
+            </div>
         </div>
     </div>
 
@@ -536,12 +628,19 @@
     <div class="toast" id="toast"></div>
 
 <script>
-// ==================== ТЕМА ====================
+// ==================== ТЕМА И ПАЛИТРА ====================
 function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedPalette = localStorage.getItem('palette') || 'default';
+    
     document.documentElement.setAttribute('data-theme', savedTheme);
+    if (savedPalette !== 'default') {
+        document.documentElement.setAttribute('data-palette', savedPalette);
+    }
+    
     updateThemeIcon(savedTheme);
 }
+
 function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -549,9 +648,43 @@ function toggleTheme() {
     localStorage.setItem('theme', newTheme);
     updateThemeIcon(newTheme);
 }
+
 function updateThemeIcon(theme) {
-    document.getElementById('themeToggleBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
+    const isDark = theme === 'dark';
+    const icon = document.getElementById('themeDropdownIcon');
+    const text = document.getElementById('themeDropdownText');
+    if (icon && text) {
+        icon.textContent = isDark ? '☀️' : '🌙';
+        text.textContent = isDark ? 'Светлая тема' : 'Тёмная тема';
+    }
 }
+
+function toggleThemeDropdown(event) {
+    if (isEditMode) return;
+    event.stopPropagation();
+    document.getElementById('themeDropdown').classList.toggle('active');
+    document.getElementById('smartDropdown').classList.remove('active');
+}
+
+function setPalette(paletteName) {
+    if (paletteName === 'default') {
+        document.documentElement.removeAttribute('data-palette');
+    } else {
+        document.documentElement.setAttribute('data-palette', paletteName);
+    }
+    localStorage.setItem('palette', paletteName);
+    closeSmartDropdown(); 
+}
+
+// Универсальное закрытие дропдаунов по клику вне области
+function closeSmartDropdown() { 
+    const smart = document.getElementById('smartDropdown');
+    const theme = document.getElementById('themeDropdown');
+    if(smart) smart.classList.remove('active'); 
+    if(theme) theme.classList.remove('active');
+}
+window.addEventListener('click', closeSmartDropdown);
+
 initTheme();
 
 // ==================== НАСТРОЙКА FIREBASE ====================
@@ -589,7 +722,7 @@ let data = {
 const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
-// ==================== АВТОРИЗАЦИЯ ====================
+// ==================== АВТОРИЗАЦИЯ (ИСПРАВЛЕНО) ====================
 auth.onAuthStateChanged(async (user) => {
     const loginOverlay = document.getElementById('loginOverlay');
     if (user) {
@@ -616,7 +749,26 @@ function loginUser() {
     const email = document.getElementById('loginEmail').value;
     const pass = document.getElementById('loginPassword').value;
     const errBox = document.getElementById('loginError');
-    auth.signInWithEmailAndPassword(email, pass).then(() => { errBox.style.display = 'none'; }).catch(err => { errBox.textContent = "Ошибка входа. Проверьте данные."; errBox.style.display = 'block'; });
+    
+    // Скрываем старую ошибку перед новой попыткой
+    errBox.style.display = 'none';
+    
+    auth.signInWithEmailAndPassword(email, pass).then(() => { 
+        errBox.style.display = 'none'; 
+    }).catch(err => { 
+        let msg = "Ошибка входа. Проверьте подключение и данные.";
+        if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+            msg = "Неверный email или пароль.";
+        } else if (err.code === 'auth/user-not-found') {
+            msg = "Аккаунт с таким email не найден.";
+        } else if (err.code === 'auth/too-many-requests') {
+            msg = "Слишком много попыток. Подождите пару минут.";
+        }
+        
+        errBox.textContent = msg; 
+        errBox.style.display = 'block'; 
+        console.error("Firebase Login Error:", err);
+    });
 }
 
 function logoutUser() { auth.signOut().then(() => window.location.reload()); }
@@ -676,7 +828,7 @@ function changeMonth(delta) {
     
     const grid = document.getElementById('calendar');
     grid.classList.remove('slide-left', 'slide-right');
-    void grid.offsetWidth; // Принудительный reflow для перезапуска анимации
+    void grid.offsetWidth; 
     grid.classList.add(delta > 0 ? 'slide-left' : 'slide-right');
     
     renderCalendar(); updateStats(); updateSettingsUI(); 
@@ -746,8 +898,6 @@ function toggleSmartDropdown(event) {
     event.stopPropagation();
     document.getElementById('smartDropdown').classList.toggle('active');
 }
-function closeSmartDropdown() { document.getElementById('smartDropdown').classList.remove('active'); }
-window.addEventListener('click', closeSmartDropdown);
 
 /* ==================== ФОКУС РЕЖИМ В 1 КЛИК ==================== */
 function enterFocusMode() {
